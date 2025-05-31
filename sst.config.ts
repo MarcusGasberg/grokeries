@@ -8,26 +8,21 @@ export default $config({
       home: "aws",
       providers: {
         aws: {
-          profile: input.stage === "production" ? "gasberg-production" : "gasberg-dev"
-        }
-      }
+          profile:
+            input.stage === "production" ? "gasberg-production" : "gasberg-dev",
+        },
+        command: "1.0.2",
+      },
     };
   },
   async run() {
-    const vpc = new sst.aws.Vpc("VPC", {
-      bastion: true,
-      nat: "managed",
-    });
-    const postgres = new sst.aws.Postgres("Postgres", { vpc, proxy: true });
+    await import("./infra/cluster");
+    await import("./infra/postgres");
+    await import("./infra/web");
+    await import("./infra/cluster");
 
-    new sst.x.DevCommand("Studio", {
-      link: [postgres],
-      dev: {
-        command: "npx drizzle-kit studio",
-      },
-    });
-
-
-    new sst.aws.TanStackStart("Web");
+    return {
+      bar: "ok",
+    };
   },
 });

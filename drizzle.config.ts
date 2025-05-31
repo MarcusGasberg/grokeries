@@ -4,7 +4,7 @@ import { defineConfig } from "drizzle-kit";
 export default defineConfig({
   dialect: "postgresql",
   // Pick up all our schema files
-  schema: ["./src/**/*.sql.ts"],
+  schema: "./src/schema.ts",
   out: "./migrations",
   dbCredentials: {
     host: Resource.Postgres.host,
@@ -12,6 +12,6 @@ export default defineConfig({
     user: Resource.Postgres.username,
     password: Resource.Postgres.password,
     database: Resource.Postgres.database,
+    ssl: false,
   },
 });
-

@@ -21,6 +21,24 @@ declare module "sst" {
       "type": "sst.aws.TanstackStart"
       "url": string
     }
+    "ZeroAuthSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "replication-bucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
+    "replication-manager": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "view-syncer": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />
