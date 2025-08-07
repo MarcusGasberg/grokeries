@@ -1,7 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 import { Resource } from "sst";
-import * as schema from "./todo.sql";
+import { schema } from "@/zero/zero-schema.gen";
 
 const pool = new Pool({
   host: Resource.Postgres.host,
@@ -9,6 +10,12 @@ const pool = new Pool({
   user: Resource.Postgres.username,
   password: Resource.Postgres.password,
   database: Resource.Postgres.database,
+  ssl: false,
 });
 
-export const db = drizzle(pool, { schema });
+const db = drizzle(pool, { schema });
+await migrate(db, {
+  migrationsFolder: "migrations",
+});
+
+export default db;

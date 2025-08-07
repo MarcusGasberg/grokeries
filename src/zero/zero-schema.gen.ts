@@ -16,7 +16,7 @@
  */
 
 import type { DrizzleToZeroSchema, ZeroCustomType } from "drizzle-zero";
-import type * as drizzleSchema from "./src/schema";
+import type * as drizzleSchema from "../schema";
 
 type ZeroSchema = DrizzleToZeroSchema<typeof drizzleSchema>;
 
@@ -65,16 +65,6 @@ export const schema = {
             "createdAt"
           >,
           serverName: "created_at",
-        },
-        updatedAt: {
-          type: "number",
-          optional: true,
-          customType: null as unknown as ZeroCustomType<
-            ZeroSchema,
-            "groceries",
-            "updatedAt"
-          >,
-          serverName: "updated_at",
         },
         authorId: {
           type: "string",

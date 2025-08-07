@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, jsonb, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp } from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
   id: text("id").primaryKey(),
@@ -17,6 +17,8 @@ export const groceries = pgTable("grocery", {
   // this JSON type will be passed to Zero
   name: text("name").notNull(),
   quantity: integer("quantity").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   authorId: text("author_id").references(() => users.id),
 });
 

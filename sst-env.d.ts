@@ -5,6 +5,9 @@
 
 declare module "sst" {
   export interface Resource {
+    "MyVPC": {
+      "type": "sst.aws.Vpc"
+    }
     "Postgres": {
       "database": string
       "host": string
@@ -14,7 +17,6 @@ declare module "sst" {
       "username": string
     }
     "VPC": {
-      "bastion": string
       "type": "sst.aws.Vpc"
     }
     "Web": {

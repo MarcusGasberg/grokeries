@@ -35,6 +35,7 @@ const replicationManager = new sst.aws.Service(`replication-manager`, {
   architecture: "arm64",
   image: commonEnv.ZERO_IMAGE_URL,
   link: [replicationBucket],
+  dev: false,
   health: {
     command: ["CMD-SHELL", "curl -f http://localhost:4849/ || exit 1"],
     interval: "5 seconds",
@@ -73,52 +74,58 @@ const replicationManager = new sst.aws.Service(`replication-manager`, {
 });
 
 // View Syncer Service
-export const viewSyncer = new sst.aws.Service(`view-syncer`, {
-  cluster,
-  cpu: "1 vCPU",
-  memory: "2 GB",
-  architecture: "arm64",
-  image: commonEnv.ZERO_IMAGE_URL,
-  link: [replicationBucket],
-  dev: {
-    command: "npx zero-cache",
-  },
-  health: {
-    command: ["CMD-SHELL", "curl -f http://localhost:4848/ || exit 1"],
-    interval: "5 seconds",
-    retries: 3,
-    startPeriod: "300 seconds",
-  },
-  environment: {
-    ...commonEnv,
-    ZERO_CHANGE_STREAMER_URI: replicationManager.url,
-  },
-  logging: {
-    retention: "1 month",
-  },
-  loadBalancer: {
-    public: true,
-    rules: [{ listen: "80/http", forward: "4848/http" }],
-  },
-  transform: {
-    target: {
-      healthCheck: {
-        enabled: true,
-        path: "/keepalive",
-        protocol: "HTTP",
-        interval: 5,
-        healthyThreshold: 2,
-        timeout: 3,
+export const viewSyncer = new sst.aws.Service(
+  `view-syncer`,
+  {
+    cluster,
+    cpu: "1 vCPU",
+    memory: "2 GB",
+    architecture: "arm64",
+    image: commonEnv.ZERO_IMAGE_URL,
+    link: [replicationBucket],
+    dev: {
+      command: "npx zero-cache-dev -p zero-schema.ts",
+    },
+    health: {
+      command: ["CMD-SHELL", "curl -f http://localhost:4848/ || exit 1"],
+      interval: "5 seconds",
+      retries: 3,
+      startPeriod: "300 seconds",
+    },
+    environment: {
+      ...commonEnv,
+      ZERO_CHANGE_STREAMER_MODE: "discover",
+    },
+    logging: {
+      retention: "1 month",
+    },
+    loadBalancer: {
+      public: true,
+      rules: [{ listen: "80/http", forward: "4848/http" }],
+    },
+    transform: {
+      target: {
+        healthCheck: {
+          enabled: true,
+          path: "/keepalive",
+          protocol: "HTTP",
+          interval: 5,
+          healthyThreshold: 2,
+          timeout: 3,
+        },
+        stickiness: {
+          enabled: true,
+          type: "lb_cookie",
+          cookieDuration: 120,
+        },
+        loadBalancingAlgorithmType: "least_outstanding_requests",
       },
-      stickiness: {
-        enabled: true,
-        type: "lb_cookie",
-        cookieDuration: 120,
-      },
-      loadBalancingAlgorithmType: "least_outstanding_requests",
     },
   },
-});
+  {
+    dependsOn: [replicationManager],
+  },
+);
 
 // Permissions deployment
 // Note: this setup requires your CI/CD pipeline to have access to your

@@ -16,10 +16,11 @@ export default $config({
     };
   },
   async run() {
+    await import("./infra/network");
     await import("./infra/cluster");
     await import("./infra/postgres");
     await import("./infra/web");
-    await import("./infra/cluster");
+    await import("./infra/zero");
 
     return {
       bar: "ok",
