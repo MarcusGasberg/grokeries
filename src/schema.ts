@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, pgEnum } from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
   id: text("id").primaryKey(),
@@ -12,6 +12,17 @@ export const usersRelations = relations(users, ({ many }) => ({
   groceries: many(groceries),
 }));
 
+export const groceryCategory = pgEnum("grocery_category", [
+  "produce",
+  "dairy",
+  "meat",
+  "frozen",
+  "bakery",
+  "beverages",
+  "household",
+  "other",
+]);
+
 export const groceries = pgTable("grocery", {
   id: text("id").primaryKey(),
   // this JSON type will be passed to Zero
@@ -20,6 +31,7 @@ export const groceries = pgTable("grocery", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   authorId: text("author_id").references(() => users.id),
+  category: groceryCategory("category").notNull(),
 });
 
 export const groceriesRelations = relations(groceries, ({ one }) => ({

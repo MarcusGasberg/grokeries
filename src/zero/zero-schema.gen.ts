@@ -66,6 +66,16 @@ export const schema = {
           >,
           serverName: "created_at",
         },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceries",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
         authorId: {
           type: "string",
           optional: true,

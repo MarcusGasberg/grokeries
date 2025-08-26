@@ -35,7 +35,6 @@ export function ExistingGroceryItemDialog(props: { existingGroceryItem?: Grocery
   }, [props.existingGroceryItem, form]);
 
   const onSubmit = (value: GroceryFormValue) => {
-    console.log("Got here!", value);
     props.close(value);
   }
 
@@ -46,7 +45,9 @@ export function ExistingGroceryItemDialog(props: { existingGroceryItem?: Grocery
       }
     }}>
       <Form {...form} >
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2 items-center">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex gap-2 items-center">
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Existing Grocery</DialogTitle>
@@ -83,11 +84,6 @@ export function ExistingGroceryItemDialog(props: { existingGroceryItem?: Grocery
             </FormField>
 
             <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-
-
               <Button
                 disabled={!form.formState.isValid}
                 type="submit"
@@ -96,6 +92,9 @@ export function ExistingGroceryItemDialog(props: { existingGroceryItem?: Grocery
                 Update
               </Button>
 
+              <DialogClose asChild>
+                <Button type="reset" variant="outline">Cancel</Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </form>

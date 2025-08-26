@@ -86,6 +86,15 @@ export const schema = {
           >,
           serverName: "author_id",
         },
+        category: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceries",
+            "category"
+          >,
+        },
       },
       primaryKey: ["id"],
       serverName: "grocery",
