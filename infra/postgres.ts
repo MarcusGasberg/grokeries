@@ -42,6 +42,7 @@ export const drizzleStudio = new sst.x.DevCommand("Studio", {
 export const generateSchema = new sst.x.DevCommand("GenerateSchema", {
   link: [postgres],
   dev: {
-    command: "drizzle-zero generate --format",
+    command:
+      "drizzle-zero generate --format --output ./src/zero/zero-schema.gen.ts",
   },
 });

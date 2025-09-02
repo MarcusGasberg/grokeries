@@ -66,6 +66,15 @@ export const schema = {
           >,
           serverName: "created_at",
         },
+        completed: {
+          type: "boolean",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceries",
+            "completed"
+          >,
+        },
         updatedAt: {
           type: "number",
           optional: true,
@@ -88,7 +97,7 @@ export const schema = {
         },
         category: {
           type: "string",
-          optional: false,
+          optional: true,
           customType: null as unknown as ZeroCustomType<
             ZeroSchema,
             "groceries",

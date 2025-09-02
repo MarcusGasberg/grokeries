@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, integer, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  boolean,
+  text,
+  integer,
+  timestamp,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
   id: text("id").primaryKey(),
@@ -12,26 +19,30 @@ export const usersRelations = relations(users, ({ many }) => ({
   groceries: many(groceries),
 }));
 
-export const groceryCategory = pgEnum("grocery_category", [
+export const GROCERY_CATEGORIES = [
   "produce",
   "dairy",
   "meat",
   "frozen",
   "bakery",
+  "pantry",
   "beverages",
   "household",
   "other",
-]);
+] as const;
+export type GroceryCategory = (typeof GROCERY_CATEGORIES)[number];
+
+const groceryCategory = pgEnum("grocery_category", GROCERY_CATEGORIES);
 
 export const groceries = pgTable("grocery", {
   id: text("id").primaryKey(),
-  // this JSON type will be passed to Zero
   name: text("name").notNull(),
   quantity: integer("quantity").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  completed: boolean().notNull().default(false),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   authorId: text("author_id").references(() => users.id),
-  category: groceryCategory("category").notNull(),
+  category: groceryCategory("category").notNull().default("other"),
 });
 
 export const groceriesRelations = relations(groceries, ({ one }) => ({

@@ -66,6 +66,15 @@ export const schema = {
           >,
           serverName: "created_at",
         },
+        completed: {
+          type: "boolean",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceries",
+            "completed"
+          >,
+        },
         updatedAt: {
           type: "number",
           optional: true,
@@ -85,6 +94,15 @@ export const schema = {
             "authorId"
           >,
           serverName: "author_id",
+        },
+        category: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceries",
+            "category"
+          >,
         },
       },
       primaryKey: ["id"],
