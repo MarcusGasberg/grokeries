@@ -55,12 +55,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <div className="p-2 flex gap-2 text-lg">
-          <Link to="/">Index</Link>
-          <Link to="/about">About</Link>
-          <Link to="/groceries">Groceries</Link>
-        </div>
-
         {children}
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
