@@ -48,12 +48,12 @@ const categories: Category[] = [
     color: "bg-red-100 text-red-900 border-red-400 border-2",
   },
   {
-    value: "bakery",
+    value: "pantry",
     name: "🥫 pantry",
     color: "bg-amber-100 text-amber-900 border-amber-400 border-2",
   },
   {
-    value: "pantry",
+    value: "bakery",
     name: "🍞 Bakery",
     color: "bg-yellow-100 text-yellow-900 border-yellow-400 border-2",
   },
@@ -83,7 +83,7 @@ function RouteComponent() {
   const z = useZero<Schema>();
 
   const groceryQuery = z.query.groceries
-    .orderBy("updatedAt", "desc")
+    .orderBy("createdAt", "desc")
     .related("author");
 
   const [groceries] = useQuery(groceryQuery);
@@ -120,7 +120,8 @@ function RouteComponent() {
       id: nanoid(),
     });
 
-    form.reset();
+    form.resetField("name");
+    form.resetField("quantity");
   };
 
   const onUpdateFromExistingGroceryItem = (
@@ -164,7 +165,7 @@ function RouteComponent() {
   return (
     <div className="min-h-screen bg-background p-4 max-w-md md:max-w-3xl mx-auto">
       <div className="mb-8 pt-6">
-        <div className="bg-primary text-primary-foreground py-4 px-6 border-4 border-primary shadow-[8px_8px_0px_0px_rgba(139,92,246,1)]">
+        <div className="bg-primary text-primary-foreground py-4 px-6 border-4 border-primary shadow-[8px_8px_0px_0px_var(--ring)]">
           <div className="flex items-center gap-4 mb-2">
             <div className="p-2 bg-accent border-2 border-accent-foreground">
               <ShoppingCart className="w-8 h-8 text-accent-foreground" />
@@ -182,7 +183,7 @@ function RouteComponent() {
 
         {totalCount > 0 ? (
           completedCount != totalCount ? (
-            <div className="mt-6 p-4 bg-accent text-accent-foreground border-4 border-accent shadow-[4px_4px_0px_0px_rgba(31,41,55,1)]">
+            <div className="mt-6 p-4 bg-accent text-accent-foreground border-4 border-accent shadow-[4px_4px_0px_0px_var(--primary)]">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-black font-sans uppercase tracking-wide">
                   PROGRESS
@@ -209,7 +210,7 @@ function RouteComponent() {
                   deleteItem(item.id);
                 });
               }}
-              className="mt-6 w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-black font-sans uppercase tracking-wide text-sm border-2 border-destructive shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] hover:shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] transition-all"
+              className="mt-6 w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-black font-sans uppercase tracking-wide text-sm border-2 border-destructive shadow-[4px_4px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] transition-all"
             >
               COMPLETE MISSION
             </Button>
@@ -219,7 +220,7 @@ function RouteComponent() {
         )}
       </div>
 
-      <Card className="mb-6 border-4 border-primary shadow-[6px_6px_0px_0px_rgba(31,41,55,1)]">
+      <Card className="mb-6 border-4 border-primary shadow-[6px_6px_0px_0px_var(--ring)]">
         <CardContent className="py-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(addItem)} className="space-y-4">
@@ -259,6 +260,7 @@ function RouteComponent() {
                 {categories.map((category) => (
                   <Button
                     key={category.value}
+                    type="button"
                     variant={
                       selectedCategory === category.value
                         ? "default"
@@ -268,8 +270,8 @@ function RouteComponent() {
                     onClick={() => form.setValue("category", category.value)}
                     className={`text-xs font-black font-sans uppercase tracking-wide border-2 ${
                       selectedCategory === category.value
-                        ? "bg-primary text-primary-foreground border-primary shadow-[2px_2px_0px_0px_rgba(139,92,246,1)]"
-                        : "border-border hover:shadow-[2px_2px_0px_0px_rgba(31,41,55,1)]"
+                        ? "bg-primary text-primary-foreground border-primary shadow-[2px_2px_0px_0px_var(--accent)]"
+                        : "border-border hover:shadow-[2px_2px_0px_0px_var(--ring)]"
                     }`}
                   >
                     {category.name}
@@ -279,7 +281,7 @@ function RouteComponent() {
 
               <Button
                 type="submit"
-                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-black font-sans uppercase tracking-wide text-sm border-2 border-accent shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] hover:shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] transition-all"
+                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-black font-sans uppercase tracking-wide text-sm border-2 border-accent shadow-[4px_4px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] transition-all"
                 disabled={!form.formState.isValid}
               >
                 <Plus className="w-5 h-5 mr-2" />
@@ -309,7 +311,8 @@ function RouteComponent() {
             return (
               <Card
                 key={item.id}
-                className={`transition-all duration-200 border-4 shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] hover:shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] ${
+                onClick={() => toggleItem(item.id)}
+                className={`transition-all duration-200 border-4 shadow-[4px_4px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] ${
                   item.completed
                     ? "opacity-60 bg-muted border-muted-foreground"
                     : "bg-card border-primary hover:bg-card/90"
@@ -319,6 +322,7 @@ function RouteComponent() {
                   <div className="flex items-center gap-4">
                     <Checkbox
                       checked={!!item.completed}
+                      onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => toggleItem(item.id)}
                       className="w-6 h-6 border-2 border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent"
                     />
@@ -356,7 +360,10 @@ function RouteComponent() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => deleteItem(item.id)}
+                      onClick={(e) => {
+                        deleteItem(item.id);
+                        e.stopPropagation();
+                      }}
                       className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 border-2 border-transparent hover:border-destructive"
                     >
                       <Trash2 className="w-5 h-5" />
@@ -370,7 +377,7 @@ function RouteComponent() {
       </div>
 
       {totalCount > 0 && completedCount === totalCount && (
-        <Card className="mt-8 bg-accent text-accent-foreground border-4 border-accent shadow-[6px_6px_0px_0px_rgba(31,41,55,1)]">
+        <Card className="mt-8 bg-accent text-accent-foreground border-4 border-accent shadow-[6px_6px_0px_0px_var(--ring)]">
           <CardContent className="p-6 text-center">
             <CheckCircle2 className="w-12 h-12 text-accent-foreground mx-auto mb-3" />
             <p className="font-black font-sans text-xl uppercase tracking-wide">

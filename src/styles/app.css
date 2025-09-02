@@ -17,14 +17,14 @@
   --secondary-foreground: #ffffff; /* White text on secondary */
   --muted: #f1f5f9; /* Light gray muted */
   --muted-foreground: #6b7280; /* Medium gray for muted text */
-  --accent: #8b5cf6; /* Vibrant purple accent */
+  --accent: #f97316; /* Vibrant orange accent */
   --accent-foreground: #ffffff; /* White text on accent */
   --destructive: #be123c; /* Bold red for destructive actions */
   --destructive-foreground: #ffffff; /* White text on destructive */
   --border: #6b7280; /* Medium gray borders */
   --input: #f1f5f9; /* Light gray input background */
-  --ring: rgba(139, 92, 246, 0.5); /* Purple focus ring */
-  --chart-1: #8b5cf6;
+  --ring: rgba(249, 115, 22, 0.5); /* Orange focus ring */
+  --chart-1: #f97316;
   --chart-2: #1f2937;
   --chart-3: #374151;
   --chart-4: #f1f5f9;
@@ -32,12 +32,12 @@
   --radius: 0.5rem; /* Reduced radius for sharper edges */
   --sidebar: #f1f5f9;
   --sidebar-foreground: #1f2937;
-  --sidebar-primary: #8b5cf6;
+  --sidebar-primary: #f97316;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #6b7280;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #6b7280;
-  --sidebar-ring: rgba(139, 92, 246, 0.5);
+  --sidebar-ring: rgba(249, 115, 22, 0.5);
 }
 
 .dark {
@@ -53,26 +53,31 @@
   --secondary-foreground: #f8fafc;
   --muted: #1e293b;
   --muted-foreground: #94a3b8;
-  --accent: #a855f7;
+  --accent: #fb923c; /* Updated dark mode accent to lighter orange */
   --accent-foreground: #f8fafc;
   --destructive: #dc2626;
   --destructive-foreground: #f8fafc;
   --border: #475569;
   --input: #1e293b;
-  --ring: rgba(168, 85, 247, 0.5);
-  --chart-1: #a855f7;
+  --ring: rgba(251, 146, 60, 0.5); /* Updated dark mode ring to orange */
+  --chart-1: #fb923c; /* Updated dark mode chart colors to orange */
   --chart-2: #f8fafc;
   --chart-3: #64748b;
   --chart-4: #1e293b;
   --chart-5: #dc2626;
   --sidebar: #1e293b;
   --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #a855f7;
+  --sidebar-primary: #fb923c; /* Updated dark mode sidebar primary to orange */
   --sidebar-primary-foreground: #f8fafc;
   --sidebar-accent: #475569;
   --sidebar-accent-foreground: #f8fafc;
   --sidebar-border: #475569;
-  --sidebar-ring: rgba(168, 85, 247, 0.5);
+  --sidebar-ring: rgba(
+    251,
+    146,
+    60,
+    0.5
+  ); /* Updated dark mode sidebar ring to orange */
 }
 
 @theme inline {
@@ -115,7 +120,9 @@
   /* Updated font mappings for brutalist typography */
   --font-sans: "Space Grotesk", system-ui, sans-serif;
   --font-serif: "DM Sans", system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
 @layer base {
