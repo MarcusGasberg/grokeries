@@ -13,7 +13,9 @@ const pool = new Pool({
   ssl: false,
 });
 
-const db = drizzle(pool, { schema });
+const db = drizzle(pool, {
+  schema,
+});
 await migrate(db, {
   migrationsFolder: "migrations",
 });
