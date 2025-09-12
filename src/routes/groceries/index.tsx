@@ -15,6 +15,8 @@ import { groceryFormSchema, GroceryFormValue } from "@/shared/grocery.form";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { GroceryCategory } from "@/schema";
 import { authClient } from "@/lib/auth-client";
+import { UserMenu } from "@/components/user-menu";
+import { InviteDialog } from "@/components/invite-dialog";
 
 export const Route = createFileRoute("/groceries/")({
   component: RouteComponent,
@@ -93,6 +95,7 @@ function RouteComponent() {
   const [groceries] = useQuery(groceryQuery);
   const [showExistingGroceryItemDialog, setShowExistingGroceryItemDialog] =
     useState<Grocery | undefined>(undefined);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
   const form = useForm<GroceryFormValue>({
     resolver: zodResolver(groceryFormSchema),
@@ -105,7 +108,7 @@ function RouteComponent() {
 
   const selectedCategory = form.watch("category");
 
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session } = authClient.useSession();
   const user = session?.user;
 
   const addItem = (data: GroceryFormValue) => {
@@ -190,16 +193,7 @@ function RouteComponent() {
             </div>
 
             <div className="ml-auto">
-              <Link
-                to="/login"
-                onClick={() => {
-                  authClient.signOut();
-                }}
-                className="
-                inline-flex items-center gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground px-3 py-2 text-sm font-bold font-mono uppercase tracking-wide border-2 border-border hover:shadow-[2px_2px_0px_0px_var(--ring)]"
-              >
-                LOGOUT {(!isPending && user?.name) ?? ""}
-              </Link>
+              <UserMenu onInviteClick={() => setIsInviteDialogOpen(true)} />
             </div>
           </div>
         </div>
@@ -412,6 +406,11 @@ function RouteComponent() {
           </CardContent>
         </Card>
       )}
+
+      <InviteDialog
+        isOpen={isInviteDialogOpen}
+        onClose={() => setIsInviteDialogOpen(false)}
+      />
     </div>
   );
 }
