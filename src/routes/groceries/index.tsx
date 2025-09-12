@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -12,17 +12,21 @@ import { Grocery, Schema } from "@/zero/zero-schema";
 import { nanoid } from "nanoid";
 import { useState } from "react";
 import { groceryFormSchema, GroceryFormValue } from "@/shared/grocery.form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { GroceryCategory } from "@/schema";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/groceries/")({
   component: RouteComponent,
+  beforeLoad: async () => {
+    const { data: session, error } = await authClient.getSession();
+    if (!session?.user) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/groceries" }, // optional: send them back after login
+      });
+    }
+  },
 });
 
 interface Category {
@@ -101,6 +105,9 @@ function RouteComponent() {
 
   const selectedCategory = form.watch("category");
 
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
+
   const addItem = (data: GroceryFormValue) => {
     const existingGroceryItem = groceries.find(
       (grocery) => grocery.name === data.name,
@@ -115,6 +122,7 @@ function RouteComponent() {
 
     z.mutate.groceries.insert({
       ...data,
+      authorId: user?.id ?? "",
       updatedAt: Date.now(),
       createdAt: Date.now(),
       id: nanoid(),
@@ -133,6 +141,8 @@ function RouteComponent() {
     z.mutate.groceries.upsert({
       ...data,
       id: data.id,
+      authorId: user?.id ?? "",
+      name: data.name,
       updatedAt: Date.now(),
     });
   };
@@ -177,6 +187,19 @@ function RouteComponent() {
               <p className="text-sm font-bold font-serif uppercase tracking-wide">
                 EFFICIENT SHOPPING
               </p>
+            </div>
+
+            <div className="ml-auto">
+              <Link
+                to="/login"
+                onClick={() => {
+                  authClient.signOut();
+                }}
+                className="
+                inline-flex items-center gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground px-3 py-2 text-sm font-bold font-mono uppercase tracking-wide border-2 border-border hover:shadow-[2px_2px_0px_0px_var(--ring)]"
+              >
+                LOGOUT {(!isPending && user?.name) ?? ""}
+              </Link>
             </div>
           </div>
         </div>
