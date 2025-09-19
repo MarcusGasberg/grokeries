@@ -6,6 +6,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "@tanstack/react-router";
 import {
   MoreVertical,
   UserPlus,
@@ -20,9 +22,12 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ onInviteClick }: UserMenuProps) {
+  const router = useRouter();
   const handleLogout = () => {
-    // Add logout logic here
-    console.log("Logging out...");
+    authClient.signOut();
+    router.navigate({
+      to: "/login",
+    });
   };
 
   const handleSettings = () => {

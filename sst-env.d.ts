@@ -27,6 +27,14 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "postgres": {
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "type": "sst.aws.Postgres"
+      "username": string
+    }
     "replication-bucket": {
       "name": string
       "type": "sst.aws.Bucket"

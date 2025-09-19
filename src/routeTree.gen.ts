@@ -13,9 +13,11 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as LayoutRouteRouteImport } from './routes/_layout/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as GroceriesIndexRouteImport } from './routes/groceries/index'
+import { Route as LayoutGroceriesIndexRouteImport } from './routes/_layout/groceries/index'
+import { ServerRoute as ApiPushSplatServerRouteImport } from './routes/api/push/$'
+import { ServerRoute as ApiAuthRefreshServerRouteImport } from './routes/api/auth/refresh'
 import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/$'
 
 const rootServerRouteImport = createServerRootRoute()
@@ -30,9 +32,8 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const LayoutRouteRoute = LayoutRouteRouteImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,10 +41,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GroceriesIndexRoute = GroceriesIndexRouteImport.update({
+const LayoutGroceriesIndexRoute = LayoutGroceriesIndexRouteImport.update({
   id: '/groceries/',
   path: '/groceries/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => LayoutRouteRoute,
+} as any)
+const ApiPushSplatServerRoute = ApiPushSplatServerRouteImport.update({
+  id: '/api/push/$',
+  path: '/api/push/$',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const ApiAuthRefreshServerRoute = ApiAuthRefreshServerRouteImport.update({
+  id: '/api/auth/refresh',
+  path: '/api/auth/refresh',
+  getParentRoute: () => rootServerRouteImport,
 } as any)
 const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
   id: '/api/auth/$',
@@ -53,61 +64,72 @@ const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/groceries': typeof GroceriesIndexRoute
+  '/groceries': typeof LayoutGroceriesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/groceries': typeof GroceriesIndexRoute
+  '/groceries': typeof LayoutGroceriesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/_layout': typeof LayoutRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/groceries/': typeof GroceriesIndexRoute
+  '/_layout/groceries/': typeof LayoutGroceriesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/login' | '/register' | '/groceries'
+  fullPaths: '/' | '/login' | '/register' | '/groceries'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/login' | '/register' | '/groceries'
-  id: '__root__' | '/' | '/about' | '/login' | '/register' | '/groceries/'
+  to: '/' | '/login' | '/register' | '/groceries'
+  id:
+    | '__root__'
+    | '/'
+    | '/_layout'
+    | '/login'
+    | '/register'
+    | '/_layout/groceries/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  LayoutRouteRoute: typeof LayoutRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
-  GroceriesIndexRoute: typeof GroceriesIndexRoute
 }
 export interface FileServerRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatServerRoute
+  '/api/auth/refresh': typeof ApiAuthRefreshServerRoute
+  '/api/push/$': typeof ApiPushSplatServerRoute
 }
 export interface FileServerRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatServerRoute
+  '/api/auth/refresh': typeof ApiAuthRefreshServerRoute
+  '/api/push/$': typeof ApiPushSplatServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
   '/api/auth/$': typeof ApiAuthSplatServerRoute
+  '/api/auth/refresh': typeof ApiAuthRefreshServerRoute
+  '/api/push/$': typeof ApiPushSplatServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/auth/$'
+  fullPaths: '/api/auth/$' | '/api/auth/refresh' | '/api/push/$'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/auth/$'
-  id: '__root__' | '/api/auth/$'
+  to: '/api/auth/$' | '/api/auth/refresh' | '/api/push/$'
+  id: '__root__' | '/api/auth/$' | '/api/auth/refresh' | '/api/push/$'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
   ApiAuthSplatServerRoute: typeof ApiAuthSplatServerRoute
+  ApiAuthRefreshServerRoute: typeof ApiAuthRefreshServerRoute
+  ApiPushSplatServerRoute: typeof ApiPushSplatServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -126,11 +148,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof LayoutRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -140,17 +162,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/groceries/': {
-      id: '/groceries/'
+    '/_layout/groceries/': {
+      id: '/_layout/groceries/'
       path: '/groceries'
       fullPath: '/groceries'
-      preLoaderRoute: typeof GroceriesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof LayoutGroceriesIndexRouteImport
+      parentRoute: typeof LayoutRouteRoute
     }
   }
 }
 declare module '@tanstack/react-start/server' {
   interface ServerFileRoutesByPath {
+    '/api/push/$': {
+      id: '/api/push/$'
+      path: '/api/push/$'
+      fullPath: '/api/push/$'
+      preLoaderRoute: typeof ApiPushSplatServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/api/auth/refresh': {
+      id: '/api/auth/refresh'
+      path: '/api/auth/refresh'
+      fullPath: '/api/auth/refresh'
+      preLoaderRoute: typeof ApiAuthRefreshServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -161,18 +197,31 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
+interface LayoutRouteRouteChildren {
+  LayoutGroceriesIndexRoute: typeof LayoutGroceriesIndexRoute
+}
+
+const LayoutRouteRouteChildren: LayoutRouteRouteChildren = {
+  LayoutGroceriesIndexRoute: LayoutGroceriesIndexRoute,
+}
+
+const LayoutRouteRouteWithChildren = LayoutRouteRoute._addFileChildren(
+  LayoutRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  LayoutRouteRoute: LayoutRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-  GroceriesIndexRoute: GroceriesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 const rootServerRouteChildren: RootServerRouteChildren = {
   ApiAuthSplatServerRoute: ApiAuthSplatServerRoute,
+  ApiAuthRefreshServerRoute: ApiAuthRefreshServerRoute,
+  ApiPushSplatServerRoute: ApiPushSplatServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)

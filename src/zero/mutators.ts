@@ -1,43 +1,32 @@
 import { CustomMutatorDefs } from "@rocicorp/zero";
-import { schema, AuthData } from "./schema";
+import { schema } from "./zero-schema";
+import { nanoid } from "nanoid";
+
+type AuthData = {
+  sub: string;
+};
 
 export function createMutators(authData: AuthData | undefined) {
   return {
-    cart: {
-      add: async (
-        tx,
-        { albumID, addedAt }: { albumID: string; addedAt: number },
-      ) => {
+    groceryList: {
+      add: async (tx, { name }: { name: string }) => {
         if (!authData) {
           throw new Error("Not authenticated");
         }
         try {
-          await tx.mutate.cartItem.insert({
+          const listId = nanoid();
+          await tx.mutate.groceryList.insert({
+            id: listId,
+            name,
+          });
+          await tx.mutate.groceryListMembers.insert({
+            listId,
             userId: authData.sub,
-            albumId: albumID,
-            addedAt: tx.location === "client" ? addedAt : Date.now(),
           });
         } catch (err) {
-          console.error("error adding cart item", err);
+          console.error("error adding grocery list", err);
           throw err;
         }
-      },
-
-      remove: async (tx, albumId: string) => {
-        if (!authData) {
-          throw new Error("Not authenticated");
-        }
-        const cartItem = await tx.query.cartItem
-          .where("userId", authData.sub)
-          .where("albumId", albumId)
-          .one();
-        if (!cartItem) {
-          return;
-        }
-        await tx.mutate.cartItem.delete({
-          userId: cartItem.userId,
-          albumId: cartItem.albumId,
-        });
       },
     },
   } as const satisfies CustomMutatorDefs<typeof schema>;

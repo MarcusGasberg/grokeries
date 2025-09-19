@@ -1,4 +1,9 @@
-CREATE TYPE "public"."grocery_category" AS ENUM('produce', 'dairy', 'meat', 'frozen', 'bakery', 'pantry', 'beverages', 'household', 'other');--> statement-breakpoint
+DO $$ BEGIN
+CREATE TYPE "public"."grocery_category" AS ENUM('produce', 'dairy', 'meat', 'frozen', 'bakery', 'pantry', 'beverages', 'household', 'other');
+EXCEPTION
+WHEN duplicate_object THEN null;
+END $$;
+
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,

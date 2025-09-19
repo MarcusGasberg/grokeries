@@ -228,6 +228,16 @@ export const schema = {
           >,
           serverName: "author_id",
         },
+        listId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceries",
+            "listId"
+          >,
+          serverName: "list_id",
+        },
         category: {
           type: "string",
           optional: true,
@@ -240,6 +250,142 @@ export const schema = {
       },
       primaryKey: ["id"],
       serverName: "grocery",
+    },
+    groceryList: {
+      name: "groceryList",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryList",
+            "id"
+          >,
+        },
+        name: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryList",
+            "name"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryList",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryList",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+      },
+      primaryKey: ["id"],
+      serverName: "grocery_list",
+    },
+    groceryListMembers: {
+      name: "groceryListMembers",
+      columns: {
+        userId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListMembers",
+            "userId"
+          >,
+          serverName: "user_id",
+        },
+        listId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListMembers",
+            "listId"
+          >,
+          serverName: "list_id",
+        },
+        role: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListMembers",
+            "role"
+          >,
+        },
+        joinedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListMembers",
+            "joinedAt"
+          >,
+          serverName: "joined_at",
+        },
+      },
+      primaryKey: ["userId", "listId"],
+      serverName: "grocery_list_members",
+    },
+    jwks: {
+      name: "jwks",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "jwks",
+            "id"
+          >,
+        },
+        publicKey: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "jwks",
+            "publicKey"
+          >,
+          serverName: "public_key",
+        },
+        privateKey: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "jwks",
+            "privateKey"
+          >,
+          serverName: "private_key",
+        },
+        createdAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "jwks",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+      },
+      primaryKey: ["id"],
     },
     session: {
       name: "session",
@@ -471,6 +617,50 @@ export const schema = {
           cardinality: "one",
         },
       ],
+      list: [
+        {
+          sourceField: ["listId"],
+          destField: ["id"],
+          destSchema: "groceryList",
+          cardinality: "one",
+        },
+      ],
+    },
+    groceryListMembers: {
+      user: [
+        {
+          sourceField: ["userId"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+      list: [
+        {
+          sourceField: ["listId"],
+          destField: ["id"],
+          destSchema: "groceryList",
+          cardinality: "one",
+        },
+      ],
+    },
+    groceryList: {
+      members: [
+        {
+          sourceField: ["id"],
+          destField: ["listId"],
+          destSchema: "groceryListMembers",
+          cardinality: "many",
+        },
+      ],
+      groceries: [
+        {
+          sourceField: ["id"],
+          destField: ["listId"],
+          destSchema: "groceries",
+          cardinality: "many",
+        },
+      ],
     },
     user: {
       groceries: [
@@ -478,6 +668,14 @@ export const schema = {
           sourceField: ["id"],
           destField: ["authorId"],
           destSchema: "groceries",
+          cardinality: "many",
+        },
+      ],
+      lists: [
+        {
+          sourceField: ["id"],
+          destField: ["userId"],
+          destSchema: "groceryListMembers",
           cardinality: "many",
         },
       ],

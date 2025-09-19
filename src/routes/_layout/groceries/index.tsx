@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, ShoppingCart, CheckCircle2, Zap } from "lucide-react";
-import { useQuery, useZero } from "@rocicorp/zero/react";
-import { Grocery, Schema } from "@/zero/zero-schema";
+import { useQuery } from "@rocicorp/zero/react";
+import { Schema } from "@/zero/zero-schema";
 import { nanoid } from "nanoid";
 import { useState } from "react";
 import { groceryFormSchema, GroceryFormValue } from "@/shared/grocery.form";
@@ -17,12 +17,21 @@ import { GroceryCategory } from "@/schema";
 import { authClient } from "@/lib/auth-client";
 import { UserMenu } from "@/components/user-menu";
 import { InviteDialog } from "@/components/invite-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export const Route = createFileRoute("/groceries/")({
+export const Route = createFileRoute("/_layout/groceries/")({
   component: RouteComponent,
   beforeLoad: async () => {
     const { data: session, error } = await authClient.getSession();
-    if (!session?.user) {
+    if (!session?.session) {
       throw redirect({
         to: "/login",
         search: { redirect: "/groceries" }, // optional: send them back after login
@@ -86,15 +95,28 @@ const categories: Category[] = [
 ] as const;
 
 function RouteComponent() {
-  const z = useZero<Schema>();
+  const { zero, session } = useRouter().options.context;
+  const user = session?.data;
 
-  const groceryQuery = z.query.groceries
+  const listsQuery = zero.query.groceryList
+    .whereExists("members", (q) => q.where("userId", "=", user?.userID ?? "-"))
+    .orderBy("name", "desc");
+  const [lists] = useQuery(listsQuery);
+
+  if (user && !lists.length) {
+    const name = user.name.endsWith("s")
+      ? `${user.name}' List`
+      : `${user.name}'s List`;
+    zero.mutate.groceryList.add({
+      name,
+    });
+  }
+
+  const groceryQuery = zero.query.groceries
     .orderBy("createdAt", "desc")
     .related("author");
 
   const [groceries] = useQuery(groceryQuery);
-  const [showExistingGroceryItemDialog, setShowExistingGroceryItemDialog] =
-    useState<Grocery | undefined>(undefined);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
   const form = useForm<GroceryFormValue>({
@@ -108,24 +130,14 @@ function RouteComponent() {
 
   const selectedCategory = form.watch("category");
 
-  const { data: session } = authClient.useSession();
-  const user = session?.user;
-
   const addItem = (data: GroceryFormValue) => {
     const existingGroceryItem = groceries.find(
       (grocery) => grocery.name === data.name,
     );
-    if (existingGroceryItem) {
-      setShowExistingGroceryItemDialog({
-        ...existingGroceryItem,
-        quantity: data.quantity + existingGroceryItem.quantity,
-      });
-      return;
-    }
 
-    z.mutate.groceries.insert({
+    zero.mutate.groceries.insert({
       ...data,
-      authorId: user?.id ?? "",
+      authorId: user?.userID ?? "",
       updatedAt: Date.now(),
       createdAt: Date.now(),
       id: nanoid(),
@@ -135,28 +147,13 @@ function RouteComponent() {
     form.resetField("quantity");
   };
 
-  const onUpdateFromExistingGroceryItem = (
-    data: GroceryFormValue | undefined,
-  ) => {
-    setShowExistingGroceryItemDialog(undefined);
-    if (!data?.id) return;
-
-    z.mutate.groceries.upsert({
-      ...data,
-      id: data.id,
-      authorId: user?.id ?? "",
-      name: data.name,
-      updatedAt: Date.now(),
-    });
-  };
-
   const completedCount = groceries.filter((item) => item.completed).length;
   const totalCount = groceries.length;
 
   const toggleItem = (id: string) => {
     const item = groceries.find((item) => item.id === id);
     if (item) {
-      z.mutate.groceries.upsert({
+      zero.mutate.groceries.upsert({
         ...item,
         completed: !item.completed,
         updatedAt: Date.now(),
@@ -165,7 +162,7 @@ function RouteComponent() {
   };
 
   const deleteItem = (id: string) => {
-    z.mutate.groceries.delete({ id });
+    zero.mutate.groceries.delete({ id });
   };
 
   const getCategoryInfo = (categoryValue: string | null) => {
@@ -185,7 +182,7 @@ function RouteComponent() {
             </div>
             <div>
               <h1 className="text-3xl font-black font-sans tracking-tight uppercase">
-                GROKERIES
+                {user?.name ?? ""}' GROKERIES
               </h1>
               <p className="text-sm font-bold font-serif uppercase tracking-wide">
                 EFFICIENT SHOPPING
@@ -193,6 +190,19 @@ function RouteComponent() {
             </div>
 
             <div className="ml-auto">
+              <Select>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select a list" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Grocery lists</SelectLabel>
+                    {lists.map((list) => (
+                      <SelectItem value="apple">{list.name}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
               <UserMenu onInviteClick={() => setIsInviteDialogOpen(true)} />
             </div>
           </div>

@@ -6,6 +6,7 @@ import {
   integer,
   timestamp,
   pgEnum,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -68,9 +69,29 @@ export const verification = pgTable("verification", {
     .notNull(),
 });
 
-export const usersRelations = relations(user, ({ many }) => ({
-  groceries: many(groceries),
-}));
+export const jwks = pgTable("jwks", {
+  id: text("id").primaryKey(),
+  publicKey: text("public_key").notNull(),
+  privateKey: text("private_key").notNull(),
+  createdAt: timestamp("created_at").notNull(),
+});
+
+export const listRole = pgEnum("list_role", ["owner", "editor", "viewer"]);
+
+export const groceryListMembers = pgTable(
+  "grocery_list_members",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    listId: text("list_id")
+      .notNull()
+      .references(() => groceryList.id, { onDelete: "cascade" }),
+    role: listRole("role").notNull().default("viewer"),
+    joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.listId] })],
+);
 
 export const GROCERY_CATEGORIES = [
   "produce",
@@ -87,6 +108,18 @@ export type GroceryCategory = (typeof GROCERY_CATEGORIES)[number];
 
 export const groceryCategory = pgEnum("grocery_category", GROCERY_CATEGORIES);
 
+// Grocery List Table
+export const groceryList = pgTable("grocery_list", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(), // e.g., "Weekly groceries"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Update groceries table to belong to a list
 export const groceries = pgTable("grocery", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -94,17 +127,49 @@ export const groceries = pgTable("grocery", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   completed: boolean().notNull().default(false),
   updatedAt: timestamp("updated_at")
-    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .$onUpdate(() => new Date())
     .notNull(),
   authorId: text("author_id")
     .notNull()
     .references(() => user.id),
+  listId: text("list_id") // 👈 groceries now belong to a list
+    .notNull()
+    .references(() => groceryList.id, { onDelete: "cascade" }),
   category: groceryCategory("category").notNull().default("other"),
 });
+
+// Relations
+export const groceryListRelations = relations(groceryList, ({ many }) => ({
+  members: many(groceryListMembers),
+  groceries: many(groceries),
+}));
+
+export const groceryListMembersRelations = relations(
+  groceryListMembers,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [groceryListMembers.userId],
+      references: [user.id],
+    }),
+    list: one(groceryList, {
+      fields: [groceryListMembers.listId],
+      references: [groceryList.id],
+    }),
+  }),
+);
 
 export const groceriesRelations = relations(groceries, ({ one }) => ({
   author: one(user, {
     fields: [groceries.authorId],
     references: [user.id],
   }),
+  list: one(groceryList, {
+    fields: [groceries.listId],
+    references: [groceryList.id],
+  }),
+}));
+
+export const usersRelations = relations(user, ({ many }) => ({
+  groceries: many(groceries),
+  lists: many(groceryListMembers),
 }));

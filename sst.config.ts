@@ -89,10 +89,14 @@ export default $config({
       ZERO_CHANGE_DB: DB_CONNECTION_STRING,
       ZERO_AUTH_SECRET: zeroAuthSecret.value,
       ZERO_REPLICA_FILE: "sync-replica.db",
-      ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
       ZERO_IMAGE_URL: `rocicorp/zero:${zeroVersion}`,
       ZERO_CVR_MAX_CONNS: "10",
       ZERO_UPSTREAM_MAX_CONNS: "10",
+      ...($dev
+        ? {}
+        : {
+            ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
+          }),
     };
 
     // Replication Manager Service
@@ -104,6 +108,7 @@ export default $config({
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
       dev: false,
+      wait: true,
       health: {
         command: ["CMD-SHELL", "curl -f http://localhost:4849/ || exit 1"],
         interval: "5 seconds",
@@ -112,7 +117,7 @@ export default $config({
       },
       environment: {
         ...commonEnv,
-        ZERO_CHANGE_MAX_CONNS: "3",
+        ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
         ZERO_NUM_SYNC_WORKERS: "0",
       },
       loadBalancer: {
@@ -152,7 +157,7 @@ export default $config({
         image: commonEnv.ZERO_IMAGE_URL,
         link: [replicationBucket],
         dev: {
-          command: "npx zero-cache-dev -p zero-schema.ts",
+          command: "bunx zero-cache-dev -p src/zero/zero-schema.ts",
         },
         health: {
           command: ["CMD-SHELL", "curl -f http://localhost:4848/ || exit 1"],

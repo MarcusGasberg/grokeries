@@ -8,6 +8,20 @@
       "when": 1757615154746,
       "tag": "0000_cloudy_omega_red",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1757681858247,
+      "tag": "0001_slimy_gideon",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1758048240090,
+      "tag": "0002_hard_chamber",
+      "breakpoints": true
     }
   ]
 }

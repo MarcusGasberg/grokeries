@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -42,17 +42,22 @@ function LoginComponent() {
     resolver: zodResolver(loginFormSchema),
     mode: "onBlur",
   });
+  const router = useRouter();
 
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const onSubmit = async (values: LoginFormValue) => {
     setLoginError(null);
     const { error } = await authClient.signIn.email({
-      ...values,
+      email: values.email,
+      password: values.password,
       callbackURL: "/groceries",
     });
-
-    setLoginError(error?.message ?? null);
+    if (!error) {
+      router.navigate({ to: "/groceries" });
+    } else {
+      setLoginError(error?.message ?? null);
+    }
   };
 
   return (

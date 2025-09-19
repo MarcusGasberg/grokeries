@@ -1,38 +1,35 @@
-import { useMemo } from 'react';
-import { authClient } from 'auth/client';
-import { Cookies, useCookies } from 'react-cookie';
-import { RouterContextProvider, useRouter } from '@tanstack/react-router';
+import { useMemo } from "react";
+import { Cookies, useCookies } from "react-cookie";
+import { RouterContextProvider, useRouter } from "@tanstack/react-router";
 
 export type SessionContextType = {
   data:
-  | {
-    userID: string;
-    email: string;
-  }
-  | undefined;
-  login: () => void;
-  logout: () => void;
+    | {
+        userID: string;
+        email: string;
+        name: string;
+      }
+    | undefined;
   zeroAuth: () => Promise<string | undefined>;
 };
 
 export function SessionInit({ children }: { children: React.ReactNode }) {
-  const [cookies] = useCookies(['userid', 'email', 'jwt']);
+  const [cookies] = useCookies(["userid", "email", "name", "jwt"]);
 
   const data = useMemo(() => {
-    if (!cookies.userid || !cookies.email) {
+    if (!cookies.userid || !cookies.name || !cookies.email) {
       return undefined;
     }
     return {
       userID: cookies.userid,
       email: cookies.email,
+      name: cookies.name,
     };
-  }, [cookies.userid, cookies.email]);
+  }, [cookies.userid, cookies.name, cookies.email]);
 
   const session = useMemo(() => {
     return {
       data,
-      login,
-      logout,
       zeroAuth,
     };
   }, [data, cookies.jwt]);
@@ -53,25 +50,11 @@ export function SessionInit({ children }: { children: React.ReactNode }) {
   );
 }
 
-function login() {
-  const callbackURL = location.href;
-  authClient.signIn.social({
-    provider: 'github',
-    callbackURL,
-    errorCallbackURL: callbackURL,
-    newUserCallbackURL: callbackURL,
-  });
-}
-
-function logout() {
-  authClient.signOut();
-}
-
-async function zeroAuth(error?: 'invalid-token') {
+async function zeroAuth(error?: "invalid-token") {
   if (error) {
-    await fetch('/api/auth/refresh', {
-      credentials: 'include',
+    await fetch("/api/auth/refresh", {
+      credentials: "include",
     });
   }
-  return new Cookies().get('jwt') as string | undefined;
+  return new Cookies().get("jwt") as string | undefined;
 }

@@ -1,57 +1,54 @@
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import {
   createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Link,
   Outlet,
   Scripts,
-} from '@tanstack/react-router'
-import appCss from '@/styles/app.css?url'
-import * as React from 'react'
-import { ZeroProvider } from '@rocicorp/zero/react'
-import { Zero } from '@rocicorp/zero'
-import { schema } from '@/zero/zero-schema';
+} from "@tanstack/react-router";
+import appCss from "@/styles/app.css?url";
+import * as React from "react";
+import { RouterContext } from "@/router";
+import { must } from "@/shared/must";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
-    links: [{ rel: 'stylesheet', href: appCss }],
+    links: [{ rel: "stylesheet", href: appCss }],
     meta: [
       {
-        charSet: 'utf-8',
+        charSet: "utf-8",
       },
       {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
       },
       {
-        title: 'ztunes',
+        title: "grokeries",
       },
     ],
   }),
   component: RootComponent,
-})
-
-
-const z = new Zero({
-  userID: 'anon',
-  server: import.meta.env['VITE_PUBLIC_SERVER'],
-  schema,
 });
 
 function RootComponent() {
   return (
     <RootDocument>
-      <ZeroProvider zero={z}>
-        <Outlet />
-      </ZeroProvider>
+      <Outlet />
     </RootDocument>
-  )
+  );
 }
+
+const serverURL = must(
+  import.meta.env.VITE_PUBLIC_SERVER,
+  "VITE_PUBLIC_SERVER is required",
+);
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <head>
+        <link rel="preconnect" href={serverURL} />
         <HeadContent />
       </head>
       <body>
@@ -60,5 +57,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }
