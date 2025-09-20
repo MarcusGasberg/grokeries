@@ -166,8 +166,8 @@ function RouteComponent() {
   const toggleItem = (id: string) => {
     const item = groceries.find((item) => item.id === id);
     if (item) {
-      zero.mutate.groceries.upsert({
-        ...item,
+      zero.mutate.groceries.update({
+        id: item.id,
         completed: !item.completed,
         updatedAt: Date.now(),
       });
@@ -202,7 +202,7 @@ function RouteComponent() {
               </p>
             </div>
 
-            <div className="ml-auto">
+            <div className="ml-auto flex gap-2 items-center">
               <Select
                 value={selectedListId}
                 onValueChange={(val) => setSelectedListId(val)}
