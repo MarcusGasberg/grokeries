@@ -222,7 +222,7 @@ export function LandingPage() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="bg-primary-foreground text-primary font-black font-sans uppercase tracking-wide text-lg px-8 py-6 border-4 border-primary-foreground hover:bg-primary-foreground/90 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all"
+                  className="bg-primary-foreground text-primary font-black font-sans uppercase tracking-wide text-lg px-8 py-6 border-4 border-primary-foreground  shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all"
                 >
                   EXISTING USER? LOGIN
                 </Button>
