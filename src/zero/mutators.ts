@@ -9,6 +9,31 @@ type AuthData = {
 export function createMutators(authData: AuthData | undefined) {
   return {
     groceryList: {
+      addInital: async (tx, { name, id }: { name: string; id: string }) => {
+        if (!authData) {
+          throw new Error("Not authenticated");
+        }
+        try {
+          const existingLists = await tx.query.groceryListMembers
+            .where("userId", "=", authData.sub)
+            .one();
+          if (existingLists) {
+            return;
+          }
+
+          await tx.mutate.groceryList.insert({
+            id,
+            name,
+          });
+          await tx.mutate.groceryListMembers.insert({
+            listId: id,
+            userId: authData.sub,
+          });
+        } catch (err) {
+          console.error("error adding grocery list", err);
+          throw err;
+        }
+      },
       add: async (tx, { name }: { name: string }) => {
         if (!authData) {
           throw new Error("Not authenticated");

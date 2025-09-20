@@ -10,7 +10,7 @@ import { Trash2, Plus, ShoppingCart, CheckCircle2, Zap } from "lucide-react";
 import { useQuery } from "@rocicorp/zero/react";
 import { Schema } from "@/zero/zero-schema";
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { groceryFormSchema, GroceryFormValue } from "@/shared/grocery.form";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { GroceryCategory } from "@/schema";
@@ -101,20 +101,32 @@ function RouteComponent() {
   const listsQuery = zero.query.groceryList
     .whereExists("members", (q) => q.where("userId", "=", user?.userID ?? "-"))
     .orderBy("name", "desc");
-  const [lists] = useQuery(listsQuery);
 
-  if (user && !lists.length) {
-    const name = user.name.endsWith("s")
-      ? `${user.name}' List`
-      : `${user.name}'s List`;
-    zero.mutate.groceryList.add({
-      name,
-    });
-  }
+  const [lists] = useQuery(listsQuery);
+  const [selectedListId, setSelectedListId] = useState<string>(lists?.[0]?.id);
+
+  listsQuery.preload().complete.then();
+
+  useEffect(() => {
+    if (user && lists?.length === 0) {
+      const name = user.name.endsWith("s")
+        ? `${user.name}' List`
+        : `${user.name}'s List`;
+      const listId = nanoid();
+      zero.mutate.groceryList.addInital({
+        name,
+        id: listId,
+      });
+    } else {
+      setSelectedListId(lists[0].id);
+    }
+  }, [lists]); // Add dependencies for re-triggering when data updates
 
   const groceryQuery = zero.query.groceries
     .orderBy("createdAt", "desc")
-    .related("author");
+    .related("author")
+    .related("list")
+    .where("listId", "=", selectedListId);
 
   const [groceries] = useQuery(groceryQuery);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
@@ -141,6 +153,7 @@ function RouteComponent() {
       updatedAt: Date.now(),
       createdAt: Date.now(),
       id: nanoid(),
+      listId: selectedListId,
     });
 
     form.resetField("name");
@@ -190,7 +203,10 @@ function RouteComponent() {
             </div>
 
             <div className="ml-auto">
-              <Select>
+              <Select
+                value={selectedListId}
+                onValueChange={(val) => setSelectedListId(val)}
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select a list" />
                 </SelectTrigger>
@@ -198,7 +214,9 @@ function RouteComponent() {
                   <SelectGroup>
                     <SelectLabel>Grocery lists</SelectLabel>
                     {lists.map((list) => (
-                      <SelectItem value="apple">{list.name}</SelectItem>
+                      <SelectItem key={list.id} value={list.id}>
+                        {list.name}
+                      </SelectItem>
                     ))}
                   </SelectGroup>
                 </SelectContent>

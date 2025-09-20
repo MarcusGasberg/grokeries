@@ -24,7 +24,6 @@ export const auth = betterAuth({
     // We set the JWT, email, and userid in cookies to avoid needing an extra
     // round-trip to get them on startup.
     after: createAuthMiddleware(async (ctx) => {
-      console.log("GOT HERE", ctx);
       if (ctx.path.indexOf("/sign-in/") !== -1) {
         const headers = must(ctx.context.responseHeaders);
         const setCookieHeader = ctx.context.responseHeaders?.get("set-cookie");
