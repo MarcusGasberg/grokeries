@@ -118,7 +118,7 @@ function RouteComponent() {
         id: listId,
       });
     } else {
-      setSelectedListId(lists[0].id);
+      setSelectedListId(lists?.[0].id);
     }
   }, [lists]); // Add dependencies for re-triggering when data updates
 
