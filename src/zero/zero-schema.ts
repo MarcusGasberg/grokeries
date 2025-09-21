@@ -7,7 +7,7 @@ import { schema, type Schema } from "./zero-schema.gen";
 
 export { schema, type Schema };
 
-export type User = Row<typeof schema.tables.users>;
+export type User = Row<typeof schema.tables.user>;
 export type Grocery = Row<typeof schema.tables.groceries>;
 
 export const permissions = definePermissions<{}, Schema>(schema, () => ({

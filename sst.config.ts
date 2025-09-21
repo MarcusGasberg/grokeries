@@ -117,7 +117,6 @@ export default $config({
       },
       environment: {
         ...commonEnv,
-        ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
         ZERO_NUM_SYNC_WORKERS: "0",
       },
       loadBalancer: {

@@ -10,7 +10,7 @@ import { Trash2, Plus, ShoppingCart, CheckCircle2, Zap } from "lucide-react";
 import { useQuery } from "@rocicorp/zero/react";
 import { Schema } from "@/zero/zero-schema";
 import { nanoid } from "nanoid";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { groceryFormSchema, GroceryFormValue } from "@/shared/grocery.form";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { GroceryCategory } from "@/schema";
@@ -140,6 +140,28 @@ function RouteComponent() {
     },
   });
 
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.key !== "Enter" &&
+        event.key !== "Backspace" &&
+        event.key !== " " &&
+        event.target.id !== "name-field" &&
+        event.target.closest("#grocery-form-card")
+      ) {
+        form.setFocus("name");
+        form.setValue("name", `${form.getValues("name")}${event.key}`);
+      }
+    };
+
+    document.addEventListener("keypress", handleKeyPress);
+
+    return () => {
+      document.removeEventListener("keypress", handleKeyPress);
+    };
+  }, []);
+
   const selectedCategory = form.watch("category");
 
   const addItem = (data: GroceryFormValue) => {
@@ -265,7 +287,10 @@ function RouteComponent() {
         )}
       </div>
 
-      <Card className="mb-6 border-4 border-primary shadow-[6px_6px_0px_0px_var(--ring)]">
+      <Card
+        id="grocery-form-card"
+        className="mb-6 border-4 border-primary shadow-[6px_6px_0px_0px_var(--ring)]"
+      >
         <CardContent className="py-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(addItem)} className="space-y-4">
@@ -276,6 +301,7 @@ function RouteComponent() {
                     <FormItem className="flex-1">
                       <FormControl>
                         <Input
+                          id="name-field"
                           placeholder="ADD ITEM..."
                           {...field}
                           className="flex-1 border-2 border-border font-serif font-bold uppercase placeholder:text-muted-foreground text-sm"
