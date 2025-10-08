@@ -23,7 +23,9 @@ export const ServerRoute = createServerFileRoute("/api/push/$").methods({
     const session = await auth.api.getSession({
       headers: c.request.headers,
     });
-    const authData = session?.user ? { userId: session.user.id } : undefined;
+    const authData = session?.user
+      ? { sub: session.user.id, name: session.user.name }
+      : undefined;
     const result = await processor.process(createMutators(authData), c.request);
     return result;
   },

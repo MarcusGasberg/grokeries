@@ -296,6 +296,99 @@ export const schema = {
       primaryKey: ["id"],
       serverName: "grocery_list",
     },
+    groceryListInvitations: {
+      name: "groceryListInvitations",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "id"
+          >,
+        },
+        listId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "listId"
+          >,
+          serverName: "list_id",
+        },
+        inviterId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "inviterId"
+          >,
+          serverName: "inviter_id",
+        },
+        inviteeEmail: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "inviteeEmail"
+          >,
+          serverName: "invitee_email",
+        },
+        role: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "role"
+          >,
+        },
+        invitedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "invitedAt"
+          >,
+          serverName: "invited_at",
+        },
+        expiresAt: {
+          type: "number",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "expiresAt"
+          >,
+          serverName: "expires_at",
+        },
+        status: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "status"
+          >,
+        },
+        token: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryListInvitations",
+            "token"
+          >,
+        },
+      },
+      primaryKey: ["id"],
+      serverName: "grocery_list_invitations",
+    },
     groceryListMembers: {
       name: "groceryListMembers",
       columns: {
@@ -626,6 +719,24 @@ export const schema = {
         },
       ],
     },
+    groceryListInvitations: {
+      list: [
+        {
+          sourceField: ["listId"],
+          destField: ["id"],
+          destSchema: "groceryList",
+          cardinality: "one",
+        },
+      ],
+      inviter: [
+        {
+          sourceField: ["inviterId"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+    },
     groceryListMembers: {
       user: [
         {
@@ -661,6 +772,14 @@ export const schema = {
           cardinality: "many",
         },
       ],
+      invitations: [
+        {
+          sourceField: ["id"],
+          destField: ["listId"],
+          destSchema: "groceryListInvitations",
+          cardinality: "many",
+        },
+      ],
     },
     user: {
       groceries: [
@@ -676,6 +795,14 @@ export const schema = {
           sourceField: ["id"],
           destField: ["userId"],
           destSchema: "groceryListMembers",
+          cardinality: "many",
+        },
+      ],
+      sentInvitations: [
+        {
+          sourceField: ["id"],
+          destField: ["inviterId"],
+          destSchema: "groceryListInvitations",
           cardinality: "many",
         },
       ],

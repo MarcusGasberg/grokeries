@@ -16,24 +16,13 @@ declare module "sst" {
       "type": "sst.aws.Postgres"
       "username": string
     }
-    "VPC": {
-      "type": "sst.aws.Vpc"
+    "ResendApiKey": {
+      "type": "sst.sst.Secret"
+      "value": string
     }
     "Web": {
       "type": "sst.aws.TanstackStart"
       "url": string
-    }
-    "ZeroAuthSecret": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "postgres": {
-      "database": string
-      "host": string
-      "password": string
-      "port": number
-      "type": "sst.aws.Postgres"
-      "username": string
     }
     "replication-bucket": {
       "name": string

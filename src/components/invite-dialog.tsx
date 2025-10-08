@@ -1,6 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { toast } from "sonner";
+import { useRouter } from "@tanstack/react-router";
+import { useQuery } from "@rocicorp/zero/react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,32 +32,97 @@ type InviteFormValues = z.infer<typeof inviteSchema>;
 export function InviteDialog({
   isOpen,
   onClose,
+  listId,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  listId?: string;
 }) {
+  const { zero } = useRouter().options.context;
+
+  // Query current list members
+  const membersQuery = zero.query.groceryListMembers
+    .where("listId", "=", listId || "-")
+    .related("user");
+  const [members] = useQuery(membersQuery);
+
+  // Query pending invitations for this list
+  const invitationsQuery = zero.query.groceryListInvitations
+    .where("listId", "=", listId || "-")
+    .where("status", "=", "pending");
+  const [invitations] = useQuery(invitationsQuery);
+  console.log(invitations);
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
+    setError,
   } = useForm<InviteFormValues>({
     resolver: zodResolver(inviteSchema),
     mode: "onBlur",
   });
 
   const onSubmit = async (values: InviteFormValues) => {
-    // Normally you’d call your backend here
-    console.log(
-      "Inviting user:",
-      values.email,
-      "with message:",
-      values.message,
-    );
+    if (!listId) {
+      toast.error("No list selected. Please select a list first.");
+      return;
+    }
 
-    reset();
-    onClose();
-    // Show toast or success message
+    // Check if email is already a member
+    const isExistingMember = members.some(
+      (member) =>
+        member.user?.email.toLowerCase() === values.email.toLowerCase(),
+    );
+    if (isExistingMember) {
+      setError("email", {
+        type: "manual",
+        message: "This user is already a member of this list",
+      });
+      return;
+    }
+
+    // Check if there's already a pending invitation
+    const hasPendingInvitation = invitations.some(
+      (invitation) =>
+        invitation.inviteeEmail.toLowerCase() === values.email.toLowerCase(),
+    );
+    if (hasPendingInvitation) {
+      setError("email", {
+        type: "manual",
+        message: "An invitation has already been sent to this email",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/invitations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listId,
+          email: values.email,
+          role: "viewer", // Default role
+          message: values.message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send invitation");
+      }
+
+      reset();
+      onClose();
+      toast.success("Invitation sent successfully!");
+    } catch (error) {
+      console.error("Error sending invitation:", error);
+      toast.error("Failed to send invitation. Please try again.");
+    }
   };
 
   return (

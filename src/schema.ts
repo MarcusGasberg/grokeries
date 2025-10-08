@@ -78,6 +78,13 @@ export const jwks = pgTable("jwks", {
 
 export const listRole = pgEnum("list_role", ["owner", "editor", "viewer"]);
 
+export const invitationStatus = pgEnum("invitation_status", [
+  "pending",
+  "accepted",
+  "declined",
+  "expired",
+]);
+
 export const groceryListMembers = pgTable(
   "grocery_list_members",
   {
@@ -92,6 +99,22 @@ export const groceryListMembers = pgTable(
   },
   (table) => [primaryKey({ columns: [table.userId, table.listId] })],
 );
+
+export const groceryListInvitations = pgTable("grocery_list_invitations", {
+  id: text("id").primaryKey(),
+  listId: text("list_id")
+    .notNull()
+    .references(() => groceryList.id, { onDelete: "cascade" }),
+  inviterId: text("inviter_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  inviteeEmail: text("invitee_email").notNull(),
+  role: listRole("role").notNull().default("viewer"),
+  invitedAt: timestamp("invited_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  status: invitationStatus("status").notNull().default("pending"),
+  token: text("token").notNull().unique(),
+});
 
 export const GROCERY_CATEGORIES = [
   "produce",
@@ -127,6 +150,7 @@ export const groceries = pgTable("grocery", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   completed: boolean().notNull().default(false),
   updatedAt: timestamp("updated_at")
+    .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
   authorId: text("author_id")
@@ -142,6 +166,7 @@ export const groceries = pgTable("grocery", {
 export const groceryListRelations = relations(groceryList, ({ many }) => ({
   members: many(groceryListMembers),
   groceries: many(groceries),
+  invitations: many(groceryListInvitations),
 }));
 
 export const groceryListMembersRelations = relations(
@@ -154,6 +179,21 @@ export const groceryListMembersRelations = relations(
     list: one(groceryList, {
       fields: [groceryListMembers.listId],
       references: [groceryList.id],
+    }),
+  }),
+);
+
+export const groceryListInvitationsRelations = relations(
+  groceryListInvitations,
+  ({ one }) => ({
+    list: one(groceryList, {
+      fields: [groceryListInvitations.listId],
+      references: [groceryList.id],
+    }),
+    inviter: one(user, {
+      fields: [groceryListInvitations.inviterId],
+      references: [user.id],
+      relationName: "inviter",
     }),
   }),
 );
@@ -172,4 +212,5 @@ export const groceriesRelations = relations(groceries, ({ one }) => ({
 export const usersRelations = relations(user, ({ many }) => ({
   groceries: many(groceries),
   lists: many(groceryListMembers),
+  sentInvitations: many(groceryListInvitations, { relationName: "inviter" }),
 }));

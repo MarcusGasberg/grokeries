@@ -73,33 +73,35 @@ export default $config({
     });
 
     const zeroVersion = execSync(
-      "npm list @rocicorp/zero | grep @rocicorp/zero | cut -f 3 -d @",
+      "npm list @rocicorp/zero | grep @rocicorp/zero | head -1 | cut -f 3 -d @",
     )
       .toString()
       .trim();
 
-    const zeroAuthSecret = new sst.Secret("ZeroAuthSecret");
+    const resendApiKey = new sst.Secret("ResendApiKey");
 
     const replicationBucket = new sst.aws.Bucket(`replication-bucket`);
 
     // Common environment variables
+    // Note: In production, ZERO_AUTH_JWKS_URL should point to your web app's JWKS endpoint
+    // TODO: Update this when you have a production domain configured
     const commonEnv = {
       ZERO_UPSTREAM_DB: DB_CONNECTION_STRING,
       ZERO_CVR_DB: DB_CONNECTION_STRING,
       ZERO_CHANGE_DB: DB_CONNECTION_STRING,
-      ZERO_AUTH_SECRET: zeroAuthSecret.value,
+      ZERO_AUTH_JWKS_URL: "http://localhost:3000/api/auth/jwks",
       ZERO_REPLICA_FILE: "sync-replica.db",
       ZERO_IMAGE_URL: `rocicorp/zero:${zeroVersion}`,
       ZERO_CVR_MAX_CONNS: "10",
       ZERO_UPSTREAM_MAX_CONNS: "10",
-      ...($dev
-        ? {}
-        : {
-            ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
-          }),
+      ZERO_LITESTREAM_BACKUP_URL: $dev
+        ? "file:///tmp/zero-backup"
+        : $interpolate`s3://${replicationBucket.name}/backup`,
     };
 
     // Replication Manager Service
+    // Note: In dev mode, zero-cache-dev handles both replication and view syncing
+    // This service only runs in production
     const replicationManager = new sst.aws.Service(`replication-manager`, {
       cluster,
       cpu: "0.5 vCPU",
@@ -156,7 +158,7 @@ export default $config({
         image: commonEnv.ZERO_IMAGE_URL,
         link: [replicationBucket],
         dev: {
-          command: "bunx zero-cache-dev -p src/zero/zero-schema.ts",
+          command: "bunx zero-cache-dev -p src/zero/zero-schema.ts --push-url=http://localhost:3000/api/push",
         },
         health: {
           command: ["CMD-SHELL", "curl -f http://localhost:4848/ || exit 1"],
@@ -164,10 +166,16 @@ export default $config({
           retries: 3,
           startPeriod: "300 seconds",
         },
-        environment: {
-          ...commonEnv,
-          ZERO_CHANGE_STREAMER_MODE: "discover",
-        },
+        environment: $dev
+          ? {
+              ZERO_UPSTREAM_DB: DB_CONNECTION_STRING,
+              ZERO_AUTH_JWKS_URL: "http://localhost:3000/api/auth/jwks",
+              ZERO_REPLICA_FILE: "sync-replica.db",
+            }
+          : {
+              ...commonEnv,
+              ZERO_CHANGE_STREAMER_MODE: "discover",
+            },
         logging: {
           retention: "1 month",
         },
@@ -209,7 +217,7 @@ export default $config({
     const zeroDeployPermission = new command.local.Command(
       "zero-deploy-permissions",
       {
-        create: `npx zero-deploy-permissions -p ../../zero-schema.ts`,
+        create: `npx zero-deploy-permissions -p ${process.cwd()}/src/zero/zero-schema.ts`,
         // Run the Command on every deploy ...
         triggers: [Date.now()],
         environment: {
@@ -228,7 +236,7 @@ export default $config({
       },
       environment: {
         DATABASE_URL: DB_CONNECTION_STRING,
-        ZERO_AUTH_SECRET: "secret-shh",
+        RESEND_API_KEY: resendApiKey.value,
         PUBLIC_SERVER:
           $app.stage !== "production"
             ? "http://localhost:4848"

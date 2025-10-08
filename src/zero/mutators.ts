@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 
 type AuthData = {
   sub: string;
+  name: string;
 };
 
 export function createMutators(authData: AuthData | undefined) {

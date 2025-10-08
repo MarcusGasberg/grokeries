@@ -107,20 +107,20 @@ function RouteComponent() {
 
   listsQuery.preload().complete.then();
 
-  useEffect(() => {
-    if (user && lists?.length === 0) {
-      const name = user.name.endsWith("s")
-        ? `${user.name}' List`
-        : `${user.name}'s List`;
-      const listId = nanoid();
-      zero.mutate.groceryList.addInital({
-        name,
-        id: listId,
-      });
-    } else {
-      setSelectedListId(lists?.[0].id);
-    }
-  }, [lists]); // Add dependencies for re-triggering when data updates
+  // useEffect(() => {
+  //   if (user && lists?.length === 0) {
+  //     const name = user.name.endsWith("s")
+  //       ? `${user.name}' List`
+  //       : `${user.name}'s List`;
+  //     const listId = nanoid();
+  //     zero.mutate.groceryList.addInital({
+  //       name,
+  //       id: listId,
+  //     });
+  //   } else {
+  //     setSelectedListId(lists?.[0].id);
+  //   }
+  // }, [lists]); // Add dependencies for re-triggering when data updates
 
   const groceryQuery = zero.query.groceries
     .orderBy("createdAt", "desc")

@@ -1,0 +1,118 @@
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export interface InvitationEmailData {
+  to: string;
+  inviterName: string;
+  listName: string;
+  acceptUrl: string;
+  declineUrl: string;
+}
+
+export async function sendInvitationEmail(data: InvitationEmailData) {
+  const { to, inviterName, listName, acceptUrl, declineUrl } = data;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>JOIN THE GROCERY DESTRUCTION</title>
+      </head>
+      <body style="font-family: 'Courier New', monospace; margin: 0; padding: 0; background-color: #f9f9f9;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9f9f9;">
+          <tr>
+            <td align="center" style="padding: 40px 20px;">
+              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 8px solid #000000; box-shadow: 12px 12px 0px 0px #f97316;">
+                <tr>
+                  <td style="padding: 40px 30px;">
+                    <!-- Header -->
+                    <h1 style="font-size: 32px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: #000000; margin: 0 0 20px 0; text-align: center; font-family: 'Courier New', monospace;">
+                      GROCERY DESTRUCTION INVITATION
+                    </h1>
+
+                    <!-- Subheader -->
+                    <p style="font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #666666; margin: 0 0 30px 0; text-align: center; font-family: 'Courier New', monospace;">
+                      ${inviterName.toUpperCase()} WANTS YOU TO JOIN THEIR MISSION
+                    </p>
+
+                    <!-- Content -->
+                    <div style="text-align: center; margin: 40px 0;">
+                      <p style="font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #000000; margin: 0 0 20px 0; font-family: 'Courier New', monospace;">
+                        LIST: ${listName.toUpperCase()}
+                      </p>
+
+                      <p style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #666666; margin: 0 0 40px 0; line-height: 1.6; font-family: 'Courier New', monospace;">
+                        TIME TO CRUSH SOME GROCERIES TOGETHER.<br>
+                        ACCEPT THIS INVITATION TO BECOME A COLLABORATOR.
+                      </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" style="padding: 20px 0;">
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="padding: 0 10px;">
+                                <a href="${acceptUrl}" style="display: inline-block; padding: 16px 32px; background-color: #f97316; color: #ffffff; text-decoration: none; font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; border: 4px solid #000000; box-shadow: 6px 6px 0px 0px #000000; font-family: 'Courier New', monospace;">
+                                  ACCEPT INVITATION
+                                </a>
+                              </td>
+                              <td style="padding: 0 10px;">
+                                <a href="${declineUrl}" style="display: inline-block; padding: 16px 32px; background-color: #ffffff; color: #000000; text-decoration: none; font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; border: 4px solid #000000; box-shadow: 6px 6px 0px 0px #666666; font-family: 'Courier New', monospace;">
+                                  DECLINE
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Footer -->
+                    <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 4px solid #000000;">
+                      <p style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #666666; margin: 0; font-family: 'Courier New', monospace;">
+                        THIS INVITATION WILL EXPIRE IN 7 DAYS
+                      </p>
+                      <p style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #666666; margin: 10px 0 0 0; font-family: 'Courier New', monospace;">
+                        IF YOU DIDN'T EXPECT THIS, YOU CAN SAFELY IGNORE IT
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+
+  const text = `
+GROCERY DESTRUCTION INVITATION
+
+${inviterName.toUpperCase()} WANTS YOU TO JOIN THEIR MISSION
+
+LIST: ${listName.toUpperCase()}
+
+TIME TO CRUSH SOME GROCERIES TOGETHER.
+ACCEPT THIS INVITATION TO BECOME A COLLABORATOR.
+
+ACCEPT: ${acceptUrl}
+DECLINE: ${declineUrl}
+
+THIS INVITATION WILL EXPIRE IN 7 DAYS
+IF YOU DIDN'T EXPECT THIS, YOU CAN SAFELY IGNORE IT
+  `.trim();
+
+  return resend.emails.send({
+    from: "Grokeries <invitations@grokeries.app>",
+    to: [to],
+    subject: `JOIN ${inviterName.toUpperCase()}'S GROCERY DESTRUCTION MISSION`,
+    html,
+    text,
+  });
+}

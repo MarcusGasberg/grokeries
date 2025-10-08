@@ -11,6 +11,7 @@ import appCss from "@/styles/app.css?url";
 import * as React from "react";
 import { RouterContext } from "@/router";
 import { must } from "@/shared/must";
+import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
@@ -53,6 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster />
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>

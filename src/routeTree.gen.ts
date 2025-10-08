@@ -13,10 +13,13 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InvitationsRouteImport } from './routes/invitations'
 import { Route as LayoutRouteRouteImport } from './routes/_layout/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LayoutGroceriesIndexRouteImport } from './routes/_layout/groceries/index'
+import { ServerRoute as ApiZeroMutateServerRouteImport } from './routes/api/zero/mutate'
 import { ServerRoute as ApiPushSplatServerRouteImport } from './routes/api/push/$'
+import { ServerRoute as ApiInvitationsSplatServerRouteImport } from './routes/api/invitations/$'
 import { ServerRoute as ApiAuthRefreshServerRouteImport } from './routes/api/auth/refresh'
 import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/$'
 
@@ -30,6 +33,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationsRoute = InvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutRouteRoute = LayoutRouteRouteImport.update({
@@ -46,11 +54,22 @@ const LayoutGroceriesIndexRoute = LayoutGroceriesIndexRouteImport.update({
   path: '/groceries/',
   getParentRoute: () => LayoutRouteRoute,
 } as any)
+const ApiZeroMutateServerRoute = ApiZeroMutateServerRouteImport.update({
+  id: '/api/zero/mutate',
+  path: '/api/zero/mutate',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
 const ApiPushSplatServerRoute = ApiPushSplatServerRouteImport.update({
   id: '/api/push/$',
   path: '/api/push/$',
   getParentRoute: () => rootServerRouteImport,
 } as any)
+const ApiInvitationsSplatServerRoute =
+  ApiInvitationsSplatServerRouteImport.update({
+    id: '/api/invitations/$',
+    path: '/api/invitations/$',
+    getParentRoute: () => rootServerRouteImport,
+  } as any)
 const ApiAuthRefreshServerRoute = ApiAuthRefreshServerRouteImport.update({
   id: '/api/auth/refresh',
   path: '/api/auth/refresh',
@@ -64,12 +83,14 @@ const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/invitations': typeof InvitationsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/groceries': typeof LayoutGroceriesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/invitations': typeof InvitationsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/groceries': typeof LayoutGroceriesIndexRoute
@@ -78,19 +99,21 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_layout': typeof LayoutRouteRouteWithChildren
+  '/invitations': typeof InvitationsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_layout/groceries/': typeof LayoutGroceriesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/groceries'
+  fullPaths: '/' | '/invitations' | '/login' | '/register' | '/groceries'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/groceries'
+  to: '/' | '/invitations' | '/login' | '/register' | '/groceries'
   id:
     | '__root__'
     | '/'
     | '/_layout'
+    | '/invitations'
     | '/login'
     | '/register'
     | '/_layout/groceries/'
@@ -99,37 +122,62 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LayoutRouteRoute: typeof LayoutRouteRouteWithChildren
+  InvitationsRoute: typeof InvitationsRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
 export interface FileServerRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatServerRoute
   '/api/auth/refresh': typeof ApiAuthRefreshServerRoute
+  '/api/invitations/$': typeof ApiInvitationsSplatServerRoute
   '/api/push/$': typeof ApiPushSplatServerRoute
+  '/api/zero/mutate': typeof ApiZeroMutateServerRoute
 }
 export interface FileServerRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatServerRoute
   '/api/auth/refresh': typeof ApiAuthRefreshServerRoute
+  '/api/invitations/$': typeof ApiInvitationsSplatServerRoute
   '/api/push/$': typeof ApiPushSplatServerRoute
+  '/api/zero/mutate': typeof ApiZeroMutateServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
   '/api/auth/$': typeof ApiAuthSplatServerRoute
   '/api/auth/refresh': typeof ApiAuthRefreshServerRoute
+  '/api/invitations/$': typeof ApiInvitationsSplatServerRoute
   '/api/push/$': typeof ApiPushSplatServerRoute
+  '/api/zero/mutate': typeof ApiZeroMutateServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/auth/$' | '/api/auth/refresh' | '/api/push/$'
+  fullPaths:
+    | '/api/auth/$'
+    | '/api/auth/refresh'
+    | '/api/invitations/$'
+    | '/api/push/$'
+    | '/api/zero/mutate'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/auth/$' | '/api/auth/refresh' | '/api/push/$'
-  id: '__root__' | '/api/auth/$' | '/api/auth/refresh' | '/api/push/$'
+  to:
+    | '/api/auth/$'
+    | '/api/auth/refresh'
+    | '/api/invitations/$'
+    | '/api/push/$'
+    | '/api/zero/mutate'
+  id:
+    | '__root__'
+    | '/api/auth/$'
+    | '/api/auth/refresh'
+    | '/api/invitations/$'
+    | '/api/push/$'
+    | '/api/zero/mutate'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
   ApiAuthSplatServerRoute: typeof ApiAuthSplatServerRoute
   ApiAuthRefreshServerRoute: typeof ApiAuthRefreshServerRoute
+  ApiInvitationsSplatServerRoute: typeof ApiInvitationsSplatServerRoute
   ApiPushSplatServerRoute: typeof ApiPushSplatServerRoute
+  ApiZeroMutateServerRoute: typeof ApiZeroMutateServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -146,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitations': {
+      id: '/invitations'
+      path: '/invitations'
+      fullPath: '/invitations'
+      preLoaderRoute: typeof InvitationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout': {
@@ -173,11 +228,25 @@ declare module '@tanstack/react-router' {
 }
 declare module '@tanstack/react-start/server' {
   interface ServerFileRoutesByPath {
+    '/api/zero/mutate': {
+      id: '/api/zero/mutate'
+      path: '/api/zero/mutate'
+      fullPath: '/api/zero/mutate'
+      preLoaderRoute: typeof ApiZeroMutateServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/push/$': {
       id: '/api/push/$'
       path: '/api/push/$'
       fullPath: '/api/push/$'
       preLoaderRoute: typeof ApiPushSplatServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/api/invitations/$': {
+      id: '/api/invitations/$'
+      path: '/api/invitations/$'
+      fullPath: '/api/invitations/$'
+      preLoaderRoute: typeof ApiInvitationsSplatServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
     '/api/auth/refresh': {
@@ -212,6 +281,7 @@ const LayoutRouteRouteWithChildren = LayoutRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LayoutRouteRoute: LayoutRouteRouteWithChildren,
+  InvitationsRoute: InvitationsRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
 }
@@ -221,7 +291,9 @@ export const routeTree = rootRouteImport
 const rootServerRouteChildren: RootServerRouteChildren = {
   ApiAuthSplatServerRoute: ApiAuthSplatServerRoute,
   ApiAuthRefreshServerRoute: ApiAuthRefreshServerRoute,
+  ApiInvitationsSplatServerRoute: ApiInvitationsSplatServerRoute,
   ApiPushSplatServerRoute: ApiPushSplatServerRoute,
+  ApiZeroMutateServerRoute: ApiZeroMutateServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)

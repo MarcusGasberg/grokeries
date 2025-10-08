@@ -15,13 +15,15 @@ import {
   Settings,
   Users,
   Share2,
+  Plus,
 } from "lucide-react";
 
 interface UserMenuProps {
   onInviteClick: () => void;
+  onCreateListClick: () => void;
 }
 
-export function UserMenu({ onInviteClick }: UserMenuProps) {
+export function UserMenu({ onInviteClick, onCreateListClick }: UserMenuProps) {
   const router = useRouter();
   const handleLogout = () => {
     authClient.signOut();
@@ -60,6 +62,14 @@ export function UserMenu({ onInviteClick }: UserMenuProps) {
         className="w-56 bg-background border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(31,41,55,1)] p-2"
         align="end"
       >
+        <DropdownMenuItem
+          onClick={onCreateListClick}
+          className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-accent hover:bg-accent hover:text-background! hover:fill-accent focus:border-accent focus:bg-accent focus:text-background transition-all cursor-pointer"
+        >
+          <Plus className="w-4 h-4 group-hover:text-foreground!" />
+          CREATE LIST
+        </DropdownMenuItem>
+
         <DropdownMenuItem
           onClick={onInviteClick}
           className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-accent hover:bg-accent hover:text-background! hover:fill-accent focus:border-accent focus:bg-accent focus:text-background transition-all cursor-pointer"
