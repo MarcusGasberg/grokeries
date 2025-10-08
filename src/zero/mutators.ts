@@ -4,7 +4,6 @@ import { nanoid } from "nanoid";
 
 type AuthData = {
   sub: string;
-  name: string;
 };
 
 export function createMutators(authData: AuthData | undefined) {
@@ -35,18 +34,17 @@ export function createMutators(authData: AuthData | undefined) {
           throw err;
         }
       },
-      add: async (tx, { name }: { name: string }) => {
+      add: async (tx, { name, id }: { name: string; id: string }) => {
         if (!authData) {
           throw new Error("Not authenticated");
         }
         try {
-          const listId = nanoid();
           await tx.mutate.groceryList.insert({
-            id: listId,
+            id,
             name,
           });
           await tx.mutate.groceryListMembers.insert({
-            listId,
+            listId: id,
             userId: authData.sub,
           });
         } catch (err) {

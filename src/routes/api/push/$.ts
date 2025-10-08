@@ -1,4 +1,5 @@
 import { createServerFileRoute } from "@tanstack/react-start/server";
+import { json } from "@tanstack/react-start";
 import {
   PushProcessor,
   ZQLDatabase,
@@ -7,7 +8,7 @@ import {
 import postgres from "postgres";
 import { schema } from "@/zero/zero-schema";
 import { createMutators } from "@/zero/mutators";
-import { auth } from "@/lib/auth";
+import { getUserID } from "@/lib/get-user-id";
 
 // PushProcessor is provided by Zero to encapsulate a standard
 // implementation of the push protocol.
@@ -20,13 +21,23 @@ const processor = new PushProcessor(
 
 export const ServerRoute = createServerFileRoute("/api/push/$").methods({
   POST: async (c) => {
-    const session = await auth.api.getSession({
-      headers: c.request.headers,
-    });
-    const authData = session?.user
-      ? { sub: session.user.id, name: session.user.name }
+    const userResult = await getUserID(c.request);
+
+    // If getUserID returns an error response (which is an object without 'sub'), return it directly
+    if (typeof userResult === "object" && !("sub" in userResult)) {
+      return userResult;
+    }
+
+    const authData = userResult && typeof userResult === "object"
+      ? { sub: userResult.sub, name: userResult.name }
       : undefined;
-    const result = await processor.process(createMutators(authData), c.request);
-    return result;
+
+    try {
+      const result = await processor.process(createMutators(authData), c.request);
+      return json(result);
+    } catch (err) {
+      console.error("Error processing mutation:", err);
+      return json({ error: "Invalid token" }, { status: 401 });
+    }
   },
 });

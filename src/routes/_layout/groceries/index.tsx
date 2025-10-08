@@ -6,7 +6,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ShoppingCart, CheckCircle2, Zap } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  ShoppingCart,
+  CheckCircle2,
+  Zap,
+  ListPlus,
+} from "lucide-react";
 import { useQuery } from "@rocicorp/zero/react";
 import { Schema } from "@/zero/zero-schema";
 import { nanoid } from "nanoid";
@@ -17,6 +24,7 @@ import { GroceryCategory } from "@/schema";
 import { authClient } from "@/lib/auth-client";
 import { UserMenu } from "@/components/user-menu";
 import { InviteDialog } from "@/components/invite-dialog";
+import { CreateListDialog } from "@/components/create-list-dialog";
 import {
   Select,
   SelectContent,
@@ -29,6 +37,11 @@ import {
 
 export const Route = createFileRoute("/_layout/groceries/")({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      listId: (search.listId as string) || undefined,
+    };
+  },
   beforeLoad: async () => {
     const { data: session, error } = await authClient.getSession();
     if (!session?.session) {
@@ -95,32 +108,45 @@ const categories: Category[] = [
 ] as const;
 
 function RouteComponent() {
-  const { zero, session } = useRouter().options.context;
+  const router = useRouter();
+  const { zero, session } = router.options.context;
   const user = session?.data;
+  const { listId: listIdFromUrl } = Route.useSearch();
 
   const listsQuery = zero.query.groceryList
     .whereExists("members", (q) => q.where("userId", "=", user?.userID ?? "-"))
     .orderBy("name", "desc");
 
   const [lists] = useQuery(listsQuery);
-  const [selectedListId, setSelectedListId] = useState<string>(lists?.[0]?.id);
+  const [selectedListId, setSelectedListId] = useState<string>(
+    listIdFromUrl || lists?.[0]?.id
+  );
+
+  const updateSelectedListId = (listId: string) => {
+    setSelectedListId(listId);
+    router.navigate({
+      to: "/groceries",
+      search: { listId },
+      replace: true,
+    });
+  };
 
   listsQuery.preload().complete.then();
 
-  // useEffect(() => {
-  //   if (user && lists?.length === 0) {
-  //     const name = user.name.endsWith("s")
-  //       ? `${user.name}' List`
-  //       : `${user.name}'s List`;
-  //     const listId = nanoid();
-  //     zero.mutate.groceryList.addInital({
-  //       name,
-  //       id: listId,
-  //     });
-  //   } else {
-  //     setSelectedListId(lists?.[0].id);
-  //   }
-  // }, [lists]); // Add dependencies for re-triggering when data updates
+  useEffect(() => {
+    if (user && lists?.length === 0) {
+      const name = user.name.endsWith("s")
+        ? `${user.name}' List`
+        : `${user.name}'s List`;
+      const listId = nanoid();
+      zero.mutate.groceryList.addInital({
+        name,
+        id: listId,
+      });
+    } else if (!listIdFromUrl && lists?.[0]?.id) {
+      updateSelectedListId(lists[0].id);
+    }
+  }, [lists, listIdFromUrl]);
 
   const groceryQuery = zero.query.groceries
     .orderBy("createdAt", "desc")
@@ -130,6 +156,7 @@ function RouteComponent() {
 
   const [groceries] = useQuery(groceryQuery);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false);
 
   const form = useForm<GroceryFormValue>({
     resolver: zodResolver(groceryFormSchema),
@@ -227,7 +254,7 @@ function RouteComponent() {
             <div className="ml-auto flex gap-2 items-center">
               <Select
                 value={selectedListId}
-                onValueChange={(val) => setSelectedListId(val)}
+                onValueChange={updateSelectedListId}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select a list" />
@@ -243,7 +270,10 @@ function RouteComponent() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <UserMenu onInviteClick={() => setIsInviteDialogOpen(true)} />
+              <UserMenu
+                onInviteClick={() => setIsInviteDialogOpen(true)}
+                onCreateListClick={() => setIsCreateListDialogOpen(true)}
+              />
             </div>
           </div>
         </div>
@@ -464,6 +494,13 @@ function RouteComponent() {
       <InviteDialog
         isOpen={isInviteDialogOpen}
         onClose={() => setIsInviteDialogOpen(false)}
+        listId={selectedListId}
+      />
+
+      <CreateListDialog
+        isOpen={isCreateListDialogOpen}
+        onClose={() => setIsCreateListDialogOpen(false)}
+        onSuccess={updateSelectedListId}
       />
     </div>
   );
