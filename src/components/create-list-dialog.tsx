@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
@@ -59,11 +59,17 @@ export function CreateListDialog({
 
     // Then sync to server
     try {
-      await zero.mutate.groceryList.add({ id: listId, name: values.name });
-      toast.success("Grocery list created successfully!");
+      zero.mutate.groceryList.add({ id: listId, name: values.name });
+      toast({
+        title: "Grocery list created successfully!",
+        duration: 60_0000,
+      });
     } catch (error) {
       console.error("Error creating grocery list:", error);
-      toast.error("Failed to create grocery list. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Failed to create grocery list. Please try again.",
+      });
     }
   };
 

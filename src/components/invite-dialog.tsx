@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@rocicorp/zero/react";
 
@@ -66,7 +66,10 @@ export function InviteDialog({
 
   const onSubmit = async (values: InviteFormValues) => {
     if (!listId) {
-      toast.error("No list selected. Please select a list first.");
+      toast({
+        variant: "destructive",
+        title: "No list selected. Please select a list first.",
+      });
       return;
     }
 
@@ -118,10 +121,15 @@ export function InviteDialog({
 
       reset();
       onClose();
-      toast.success("Invitation sent successfully!");
+      toast({
+        title: "Invitation sent successfully!",
+      });
     } catch (error) {
       console.error("Error sending invitation:", error);
-      toast.error("Failed to send invitation. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Failed to send invitation. Please try again.",
+      });
     }
   };
 

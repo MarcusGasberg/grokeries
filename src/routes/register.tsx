@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +50,10 @@ function RegisterComponent() {
         onRequest: () => setLoading(true),
         onError: (ctx) => {
           setLoading(false);
-          toast.error(ctx.error.message);
+          toast({
+            variant: "destructive",
+            title: ctx.error.message,
+          });
         },
       },
     );

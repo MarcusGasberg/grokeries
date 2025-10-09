@@ -157,3 +157,4 @@ Routes are in `src/routes/` and auto-generate `routeTree.gen.ts`:
 5. **Server/client split** - Files in `src/routes/api/` are server-only; use `createServerFileRoute`
 - use bun
 - If some data is empty it might be due to permissions in @src/zero/zero-schema.ts
+- My app has a brutalism style vibe to it

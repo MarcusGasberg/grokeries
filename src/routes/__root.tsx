@@ -11,7 +11,7 @@ import appCss from "@/styles/app.css?url";
 import * as React from "react";
 import { RouterContext } from "@/router";
 import { must } from "@/shared/must";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
