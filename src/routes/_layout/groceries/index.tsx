@@ -174,7 +174,9 @@ function RouteComponent() {
         event.key !== "Enter" &&
         event.key !== "Backspace" &&
         event.key !== " " &&
-        event.target.id !== "name-field" &&
+        event.target.tagName !== "INPUT" &&
+        event.target.tagName !== "TEXTAREA" &&
+        event.target.tagName !== "SELECT" &&
         event.target.closest("#grocery-form-card")
       ) {
         form.setFocus("name");
@@ -238,25 +240,27 @@ function RouteComponent() {
     <div className="min-h-screen bg-background p-4 max-w-md md:max-w-3xl mx-auto">
       <div className="mb-8 pt-6">
         <div className="bg-primary text-primary-foreground py-4 px-6 border-4 border-primary shadow-[8px_8px_0px_0px_var(--ring)]">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-2 bg-accent border-2 border-accent-foreground">
-              <ShoppingCart className="w-8 h-8 text-accent-foreground" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-black font-sans tracking-tight uppercase">
-                {user?.name ?? ""}' GROKERIES
-              </h1>
-              <p className="text-sm font-bold font-serif uppercase tracking-wide">
-                EFFICIENT SHOPPING
-              </p>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="p-2 bg-accent border-2 border-accent-foreground flex-shrink-0">
+                <ShoppingCart className="w-8 h-8 text-accent-foreground" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight uppercase truncate">
+                  {user?.name ?? ""}' GROKERIES
+                </h1>
+                <p className="text-xs md:text-sm font-bold font-serif uppercase tracking-wide">
+                  EFFICIENT SHOPPING
+                </p>
+              </div>
             </div>
 
-            <div className="ml-auto flex gap-2 items-center">
+            <div className="flex gap-2 items-center justify-end flex-shrink-0">
               <Select
                 value={selectedListId}
                 onValueChange={updateSelectedListId}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full md:w-[180px]">
                   <SelectValue placeholder="Select a list" />
                 </SelectTrigger>
                 <SelectContent>

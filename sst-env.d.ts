@@ -5,39 +5,6 @@
 
 declare module "sst" {
   export interface Resource {
-    "MyVPC": {
-      "type": "sst.aws.Vpc"
-    }
-    "Postgres": {
-      "database": string
-      "host": string
-      "password": string
-      "port": number
-      "type": "sst.aws.Postgres"
-      "username": string
-    }
-    "ResendApiKey": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "Web": {
-      "type": "sst.aws.TanstackStart"
-      "url": string
-    }
-    "replication-bucket": {
-      "name": string
-      "type": "sst.aws.Bucket"
-    }
-    "replication-manager": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
-    }
-    "view-syncer": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
-    }
   }
 }
 /// <reference path="sst-env.d.ts" />
