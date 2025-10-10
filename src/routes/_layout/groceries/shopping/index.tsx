@@ -396,7 +396,7 @@ function RouteComponent() {
               <Card
                 key={item.id}
                 onClick={() => toggleItem(item.id)}
-                className={`transition-all duration-200 border-4 shadow-[6px_6px_0px_0px_var(--ring)] hover:shadow-[3px_3px_0px_0px_var(--ring)] bg-card border-primary hover:bg-card/90 cursor-pointer ${
+                className={`transition-all duration-200 border-2 shadow-[3px_3px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] bg-card border-primary hover:bg-card/90 cursor-pointer ${
                   dimmed ? "opacity-50" : "opacity-100"
                 }`}
                 style={
@@ -405,28 +405,28 @@ function RouteComponent() {
                   } as React.CSSProperties
                 }
               >
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-6">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3">
                     <Checkbox
                       checked={false}
                       onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => toggleItem(item.id)}
-                      className="w-8 h-8 border-4 border-primary"
+                      className="w-6 h-6 border-2 border-primary flex-shrink-0"
                     />
 
                     <div className="flex-1 min-w-0">
-                      <span className="font-black font-sans text-2xl uppercase tracking-wide text-card-foreground block mb-3">
+                      <span className="font-black font-sans text-lg uppercase tracking-wide text-card-foreground block mb-1">
                         {item.name}
                       </span>
 
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
                         <Badge
-                          className={`text-sm font-black font-sans uppercase tracking-wide ${categoryInfo.color}`}
+                          className={`text-xs font-black font-sans uppercase tracking-wide ${categoryInfo.color}`}
                         >
                           {categoryInfo.name}
                         </Badge>
                         {item.quantity && (
-                          <span className="text-lg font-bold font-mono text-muted-foreground">
+                          <span className="text-sm font-bold font-mono text-muted-foreground">
                             QTY: {item.quantity}
                           </span>
                         )}
@@ -455,7 +455,7 @@ function RouteComponent() {
               <Card
                 key={item.id}
                 onClick={() => toggleItem(item.id)}
-                className={`relative transition-all duration-200 border-4 shadow-[4px_4px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] bg-muted border-muted-foreground cursor-pointer overflow-hidden ${
+                className={`relative transition-all duration-200 border-2 shadow-[2px_2px_0px_0px_var(--ring)] hover:shadow-[1px_1px_0px_0px_var(--ring)] bg-muted border-muted-foreground cursor-pointer overflow-hidden ${
                   dimmed ? "opacity-30" : "opacity-50"
                 }`}
                 style={
@@ -464,39 +464,36 @@ function RouteComponent() {
                   } as React.CSSProperties
                 }
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
+                <CardContent className="p-2">
+                  <div className="flex items-center gap-2">
                     <Checkbox
                       checked={true}
                       onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => toggleItem(item.id)}
-                      className="w-6 h-6 border-2 border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                      className="w-5 h-5 border-2 border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent flex-shrink-0"
                     />
 
-                    <div className="flex-1 min-w-0">
-                      <span className="font-black font-sans text-lg uppercase tracking-wide line-through text-muted-foreground block mb-2">
+                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                      <span className="font-black font-sans text-xs uppercase tracking-wide line-through text-muted-foreground">
                         {item.name}
                       </span>
-
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          className={`text-xs font-black font-sans uppercase tracking-wide ${categoryInfo.color} opacity-70`}
-                        >
-                          {item.category}
-                        </Badge>
-                        {item.quantity && (
-                          <span className="text-sm font-bold font-mono text-muted-foreground">
-                            {item.quantity}
-                          </span>
-                        )}
-                      </div>
+                      <Badge
+                        className={`text-[10px] font-black font-sans uppercase tracking-wide ${categoryInfo.color} opacity-70 flex-shrink-0`}
+                      >
+                        {item.category}
+                      </Badge>
+                      {item.quantity && (
+                        <span className="text-[10px] font-bold font-mono text-muted-foreground flex-shrink-0">
+                          {item.quantity}
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   {/* User Stamp */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="rotate-[-15deg] bg-transparent text-destructive px-8 py-3 border-[6px] border-destructive border-dashed">
-                      <p className="font-black font-sans text-xl uppercase tracking-wider">
+                    <div className="rotate-[-15deg] bg-transparent text-destructive px-3 py-1 border-4 border-destructive border-dashed">
+                      <p className="font-black font-sans text-sm uppercase tracking-wider">
                         ✓{" "}
                         <span className="underline">
                           {item.author?.name || "UNKNOWN"}

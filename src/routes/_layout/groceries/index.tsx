@@ -491,7 +491,7 @@ function RouteComponent() {
               <Card
                 key={item.id}
                 onClick={() => toggleItem(item.id)}
-                className={`transition-all duration-200 border-4 shadow-[4px_4px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] ${
+                className={`transition-all duration-200 border-2 shadow-[2px_2px_0px_0px_var(--ring)] hover:shadow-[1px_1px_0px_0px_var(--ring)] ${
                   item.completed
                     ? "opacity-60 bg-muted border-muted-foreground"
                     : "bg-card border-primary hover:bg-card/90"
@@ -502,43 +502,38 @@ function RouteComponent() {
                   } as React.CSSProperties
                 }
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
+                <CardContent className="p-2">
+                  <div className="flex items-center gap-2">
                     <Checkbox
                       checked={!!item.completed}
                       onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => toggleItem(item.id)}
-                      className="w-6 h-6 border-2 border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                      className="w-5 h-5 border-2 border-primary data-[state=checked]:bg-accent data-[state=checked]:border-accent flex-shrink-0"
                     />
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span
-                          className={`font-black font-sans text-sm uppercase tracking-wide ${
-                            item.completed
-                              ? "line-through text-muted-foreground"
-                              : "text-card-foreground"
-                          }`}
-                        >
-                          {item.name}
+                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                      <span
+                        className={`font-black font-sans text-xs uppercase tracking-wide ${
+                          item.completed
+                            ? "line-through text-muted-foreground"
+                            : "text-card-foreground"
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                      {item.completed && (
+                        <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
+                      )}
+                      <Badge
+                        className={`text-[10px] font-black font-sans uppercase tracking-wide ${categoryInfo.color} flex-shrink-0`}
+                      >
+                        {item.category}
+                      </Badge>
+                      {item.quantity && (
+                        <span className="text-[10px] font-bold font-mono text-muted-foreground flex-shrink-0">
+                          {item.quantity}
                         </span>
-                        {item.completed && (
-                          <CheckCircle2 className="w-5 h-5 text-accent" />
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          className={`text-xs font-black font-sans uppercase tracking-wide ${categoryInfo.color}`}
-                        >
-                          {item.category}
-                        </Badge>
-                        {item.quantity && (
-                          <span className="text-xs font-bold font-mono text-muted-foreground">
-                            {item.quantity}
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
 
                     <Button
@@ -548,9 +543,9 @@ function RouteComponent() {
                         deleteItem(item.id);
                         e.stopPropagation();
                       }}
-                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 border-2 border-transparent hover:border-destructive"
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-1 border border-transparent hover:border-destructive flex-shrink-0"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </CardContent>
