@@ -135,6 +135,7 @@ export const groceryCategory = pgEnum("grocery_category", GROCERY_CATEGORIES);
 export const groceryList = pgTable("grocery_list", {
   id: text("id").primaryKey(),
   name: text("name").notNull(), // e.g., "Weekly groceries"
+  isDefault: boolean("is_default").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

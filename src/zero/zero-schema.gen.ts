@@ -272,6 +272,16 @@ export const schema = {
             "name"
           >,
         },
+        isDefault: {
+          type: "boolean",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "groceryList",
+            "isDefault"
+          >,
+          serverName: "is_default",
+        },
         createdAt: {
           type: "number",
           optional: true,

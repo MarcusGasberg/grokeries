@@ -34,13 +34,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { z } from "zod";
+
+const groceriesSearchSchema = z.object({
+  listId: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_layout/groceries/")({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => {
-    return {
-      listId: (search.listId as string) || undefined,
-    };
+    return groceriesSearchSchema.parse(search);
   },
   beforeLoad: async () => {
     const { data: session, error } = await authClient.getSession();
@@ -118,9 +121,14 @@ function RouteComponent() {
     .orderBy("name", "desc");
 
   const [lists] = useQuery(listsQuery);
-  const [selectedListId, setSelectedListId] = useState<string>(
-    listIdFromUrl || lists?.[0]?.id
-  );
+
+  // Find the default list
+  const defaultList = lists.find((list) => list.isDefault);
+
+  const [selectedListId, setSelectedListId] = useState<string>("");
+  const hasInitializedRef = useRef(false);
+
+  const selectedList = lists.find((list) => list.id === selectedListId);
 
   const updateSelectedListId = (listId: string) => {
     setSelectedListId(listId);
@@ -134,19 +142,51 @@ function RouteComponent() {
   listsQuery.preload().complete.then();
 
   useEffect(() => {
-    if (user && lists?.length === 0) {
+    // Only initialize once
+    if (hasInitializedRef.current) {
+      return;
+    }
+
+    // Wait for user and lists to load
+    if (!user || !lists) {
+      return;
+    }
+
+    // Case 1: No lists exist - create initial list
+    if (lists.length === 0) {
       const name = user.name.endsWith("s")
         ? `${user.name}' List`
         : `${user.name}'s List`;
       const listId = nanoid();
-      zero.mutate.groceryList.addInital({
+      zero.mutate.groceryList.addInitial({
         name,
         id: listId,
       });
-    } else if (!listIdFromUrl && lists?.[0]?.id) {
-      updateSelectedListId(lists[0].id);
+      // We let the sync re-call this and correctly set the selected list
+      return;
     }
-  }, [lists, listIdFromUrl]);
+
+    // Case 2: Lists exist - determine which to select
+    let targetListId: string | undefined;
+
+    // Priority 1: URL param (if valid)
+    if (listIdFromUrl && lists.find((l) => l.id === listIdFromUrl)) {
+      targetListId = listIdFromUrl;
+    }
+    // Priority 2: Default list
+    else if (defaultList) {
+      targetListId = defaultList.id;
+    }
+    // Priority 3: First list
+    else {
+      targetListId = lists[0]?.id;
+    }
+
+    if (targetListId) {
+      updateSelectedListId(targetListId);
+      hasInitializedRef.current = true;
+    }
+  }, [lists, user, listIdFromUrl, defaultList, router, zero]);
 
   const groceryQuery = zero.query.groceries
     .orderBy("createdAt", "desc")
@@ -157,6 +197,18 @@ function RouteComponent() {
   const [groceries] = useQuery(groceryQuery);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false);
+
+  const handleDeleteList = () => {
+    if (!selectedListId) return;
+
+    zero.mutate.groceryList.delete({ id: selectedListId });
+
+    // Navigate to the first available list or stay on the page
+    const remainingLists = lists.filter((list) => list.id !== selectedListId);
+    if (remainingLists.length > 0) {
+      updateSelectedListId(remainingLists[0].id);
+    }
+  };
 
   const form = useForm<GroceryFormValue>({
     resolver: zodResolver(groceryFormSchema),
@@ -277,6 +329,10 @@ function RouteComponent() {
               <UserMenu
                 onInviteClick={() => setIsInviteDialogOpen(true)}
                 onCreateListClick={() => setIsCreateListDialogOpen(true)}
+                onDeleteList={
+                  !selectedList?.isDefault ? handleDeleteList : undefined
+                }
+                currentListId={selectedListId}
               />
             </div>
           </div>
@@ -284,24 +340,42 @@ function RouteComponent() {
 
         {totalCount > 0 ? (
           completedCount != totalCount ? (
-            <div className="mt-6 p-4 bg-accent text-accent-foreground border-4 border-accent shadow-[4px_4px_0px_0px_var(--primary)]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-black font-sans uppercase tracking-wide">
-                  PROGRESS
-                </span>
-                <span className="text-lg font-black font-mono">
-                  {completedCount}/{totalCount}
-                </span>
+            <>
+              <div className="mt-6 p-4 bg-accent text-accent-foreground border-4 border-accent shadow-[4px_4px_0px_0px_var(--primary)]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-black font-sans uppercase tracking-wide">
+                    PROGRESS
+                  </span>
+                  <span className="text-lg font-black font-mono">
+                    {completedCount}/{totalCount}
+                  </span>
+                </div>
+                <div className="w-full bg-accent-foreground h-3 border-2 border-primary">
+                  <div
+                    className="bg-primary h-full transition-all duration-500 ease-out"
+                    style={{
+                      width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%`,
+                    }}
+                  />
+                </div>
               </div>
-              <div className="w-full bg-accent-foreground h-3 border-2 border-primary">
-                <div
-                  className="bg-primary h-full transition-all duration-500 ease-out"
-                  style={{
-                    width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%`,
-                  }}
-                />
-              </div>
-            </div>
+              <Button
+                size="lg"
+                onClick={() => {
+                  router.navigate({
+                    to: "/groceries/shopping",
+                    search: { listId: selectedListId },
+                  });
+                }}
+                className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-black font-sans uppercase tracking-wide text-lg border-4 border-green-700 shadow-[6px_6px_0px_0px_var(--ring)] hover:shadow-[3px_3px_0px_0px_var(--ring)] transition-all relative overflow-hidden group"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <ShoppingCart className="w-6 h-6" />
+                  START SHOPPING
+                </span>
+                <div className="absolute inset-0 border-4 border-green-400 opacity-0 group-hover:opacity-100 group-hover:animate-pulse" />
+              </Button>
+            </>
           ) : (
             <Button
               variant="destructive"
@@ -422,6 +496,11 @@ function RouteComponent() {
                     ? "opacity-60 bg-muted border-muted-foreground"
                     : "bg-card border-primary hover:bg-card/90"
                 }`}
+                style={
+                  {
+                    viewTransitionName: `item-${item.id}`,
+                  } as React.CSSProperties
+                }
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">

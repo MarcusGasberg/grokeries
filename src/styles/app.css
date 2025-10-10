@@ -133,3 +133,45 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* View Transitions for route navigation */
+@view-transition {
+  navigation: auto;
+}
+
+/* Allow dynamic view-transition-name via inline styles */
+@supports (view-transition-name: auto) {
+  /* Items with view-transition-name will automatically participate in transitions */
+}
+
+/* Default root transition - faster, smoother */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+  animation-timing-function: ease-in-out;
+}
+
+/* Individual item transitions - morph smoothly */
+::view-transition-group(*) {
+  animation-timing-function: ease-in-out;
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 0.3s;
+}
+
+/* Animations */
+@keyframes fade-out-scale {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}

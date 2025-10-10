@@ -29,11 +29,11 @@ As a user, I want to enter a dedicated shopping mode that provides a focused, st
 - Back button returns to main list view
 
 **Acceptance Criteria:**
-- [ ] "START SHOPPING" button visible on main grocery page
+- [x] "START SHOPPING" button visible on main grocery page
 - [ ] Navigation to shopping page with smooth view transition
-- [ ] Shopping page URL is shareable/bookmarkable
-- [ ] Back navigation preserves list state
-- [ ] Progress counter updates in real-time
+- [x] Shopping page URL is shareable/bookmarkable
+- [x] Back navigation preserves list state
+- [x] Progress counter updates in real-time
 
 ### 2. End Shopping Trip
 **As a user**, when I complete all items or want to exit shopping mode, I should be able to end the trip.
@@ -45,9 +45,9 @@ As a user, I want to enter a dedicated shopping mode that provides a focused, st
 - Confirmation dialog if exiting with many uncompleted items (>5)
 
 **Acceptance Criteria:**
-- [ ] Finish button returns to main list view
-- [ ] Exit button with conditional confirmation
-- [ ] Auto-redirect on 100% completion
+- [x] Finish button returns to main list view
+- [x] Exit button with conditional confirmation
+- [x] Auto-redirect on 100% completion
 - [ ] Shopping state clears on exit
 
 ### 3. Add Item While Shopping

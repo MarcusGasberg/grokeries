@@ -24,6 +24,7 @@ export function createRouter() {
     defaultErrorComponent: (err) => <p>{err.error.stack}</p>,
     defaultNotFoundComponent: () => <p>not found</p>,
     scrollRestoration: true,
+    viewTransition: true,
     context: {
       zero: undefined as unknown as Zero<Schema, Mutators>, // populated in ZeroInit,
       session: undefined as unknown as SessionContextType, // populated in SessionProvider

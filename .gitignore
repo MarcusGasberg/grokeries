@@ -2,3 +2,7 @@
 .sst
 node_modules
 .env
+.tanstack
+.nitro
+.output
+sync-replica*
