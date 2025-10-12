@@ -29,6 +29,20 @@
       "when": 1760086084369,
       "tag": "0003_woozy_bastion",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1760256843333,
+      "tag": "0004_early_monster_badoon",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1760260138999,
+      "tag": "0005_loving_red_skull",
+      "breakpoints": true
     }
   ]
 }

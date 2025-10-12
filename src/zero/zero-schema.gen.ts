@@ -159,6 +159,97 @@ export const schema = {
       },
       primaryKey: ["id"],
     },
+    globalGroceryItems: {
+      name: "globalGroceryItems",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "id"
+          >,
+        },
+        name: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "name"
+          >,
+        },
+        nameNormalized: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "nameNormalized"
+          >,
+          serverName: "name_normalized",
+        },
+        language: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "language"
+          >,
+        },
+        category: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "category"
+          >,
+        },
+        popularity: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "popularity"
+          >,
+        },
+        aliases: {
+          type: "json",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "aliases"
+          >,
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+        updatedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "globalGroceryItems",
+            "updatedAt"
+          >,
+          serverName: "updated_at",
+        },
+      },
+      primaryKey: ["id"],
+      serverName: "global_grocery_items",
+    },
     groceries: {
       name: "groceries",
       columns: {
@@ -646,6 +737,109 @@ export const schema = {
       },
       primaryKey: ["id"],
     },
+    userGroceryHistory: {
+      name: "userGroceryHistory",
+      columns: {
+        id: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "id"
+          >,
+        },
+        userId: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "userId"
+          >,
+          serverName: "user_id",
+        },
+        name: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "name"
+          >,
+        },
+        nameNormalized: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "nameNormalized"
+          >,
+          serverName: "name_normalized",
+        },
+        category: {
+          type: "string",
+          optional: false,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "category"
+          >,
+        },
+        language: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "language"
+          >,
+        },
+        usageCount: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "usageCount"
+          >,
+          serverName: "usage_count",
+        },
+        lastUsedAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "lastUsedAt"
+          >,
+          serverName: "last_used_at",
+        },
+        globalItemId: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "globalItemId"
+          >,
+          serverName: "global_item_id",
+        },
+        createdAt: {
+          type: "number",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "userGroceryHistory",
+            "createdAt"
+          >,
+          serverName: "created_at",
+        },
+      },
+      primaryKey: ["id"],
+      serverName: "user_grocery_history",
+    },
     verification: {
       name: "verification",
       columns: {
@@ -711,6 +905,16 @@ export const schema = {
     },
   },
   relationships: {
+    globalGroceryItems: {
+      userHistory: [
+        {
+          sourceField: ["id"],
+          destField: ["globalItemId"],
+          destSchema: "userGroceryHistory",
+          cardinality: "many",
+        },
+      ],
+    },
     groceries: {
       author: [
         {
@@ -791,6 +995,24 @@ export const schema = {
         },
       ],
     },
+    userGroceryHistory: {
+      user: [
+        {
+          sourceField: ["userId"],
+          destField: ["id"],
+          destSchema: "user",
+          cardinality: "one",
+        },
+      ],
+      globalItem: [
+        {
+          sourceField: ["globalItemId"],
+          destField: ["id"],
+          destSchema: "globalGroceryItems",
+          cardinality: "one",
+        },
+      ],
+    },
     user: {
       groceries: [
         {
@@ -813,6 +1035,14 @@ export const schema = {
           sourceField: ["id"],
           destField: ["inviterId"],
           destSchema: "groceryListInvitations",
+          cardinality: "many",
+        },
+      ],
+      groceryHistory: [
+        {
+          sourceField: ["id"],
+          destField: ["userId"],
+          destSchema: "userGroceryHistory",
           cardinality: "many",
         },
       ],

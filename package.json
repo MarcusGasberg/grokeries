@@ -13,7 +13,10 @@
     "start": "vite start",
     "sso": "aws sso login --sso-session gasberg",
     "generate": "sst dev -- drizzle-zero generate --format --output=src/zero/zero-schema.gen.ts",
-    "create-migration": "sst dev -- drizzle-kit generate"
+    "create-migration": "sst dev -- drizzle-kit generate",
+    "seed-global-items": "sst dev -- bun run scripts/seed-global-items.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -60,14 +63,18 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.8",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/aws-lambda": "^8.10.149",
     "@types/node": "^22.5.4",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "jsdom": "^27.0.0",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.7.2",
     "vite": "^7.0.4",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   },
   "trustedDependencies": [
     "@parcel/watcher",

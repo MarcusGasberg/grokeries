@@ -25,6 +25,8 @@ import { authClient } from "@/lib/auth-client";
 import { UserMenu } from "@/components/user-menu";
 import { InviteDialog } from "@/components/invite-dialog";
 import { CreateListDialog } from "@/components/create-list-dialog";
+import { AutocompleteInput } from "@/components/autocomplete-input";
+import type { AutocompleteSuggestion } from "@/lib/autocomplete";
 import {
   Select,
   SelectContent,
@@ -35,6 +37,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { z } from "zod";
+import { toast } from "@/components/ui/use-toast";
+import { checkDuplicate } from "@/lib/autocomplete";
 
 const groceriesSearchSchema = z.object({
   listId: z.string().optional(),
@@ -215,7 +219,7 @@ function RouteComponent() {
     defaultValues: {
       name: "",
       quantity: 1,
-      category: "produce",
+      category: "other",
     },
   });
 
@@ -245,11 +249,26 @@ function RouteComponent() {
 
   const selectedCategory = form.watch("category");
 
-  const addItem = (data: GroceryFormValue) => {
-    const existingGroceryItem = groceries.find(
-      (grocery) => grocery.name === data.name,
-    );
+  const handleSuggestionSelect = (suggestion: AutocompleteSuggestion) => {
+    form.setValue("name", suggestion.name);
+    form.setValue("category", suggestion.category as GroceryCategory);
+  };
 
+  const addItem = async (data: GroceryFormValue) => {
+    // Check for duplicates
+    const existingNames = groceries.map((g) => g.name);
+    const isDuplicate = checkDuplicate(data.name, existingNames);
+
+    if (isDuplicate) {
+      toast({
+        variant: "destructive",
+        title: `${data.name.toUpperCase()} IS ALREADY IN YOUR LIST`,
+        description: "ITEM ALREADY EXISTS",
+      });
+      return;
+    }
+
+    // Add item to current grocery list
     zero.mutate.groceries.insert({
       ...data,
       authorId: user?.userID ?? "",
@@ -258,6 +277,38 @@ function RouteComponent() {
       id: nanoid(),
       listId: selectedListId,
     });
+
+    // Track in user history for future autocomplete learning
+    const historyQuery = zero.query.userGroceryHistory
+      .where("userId", "=", user?.userID ?? "")
+      .where("nameNormalized", "=", data.name.toLowerCase().trim());
+
+    const [existingHistory] = await historyQuery.run();
+
+    if (existingHistory && existingHistory.length > 0) {
+      // Update existing history entry
+      const history = existingHistory[0];
+      zero.mutate.userGroceryHistory.update({
+        id: history.id,
+        usageCount: history.usageCount + 1,
+        lastUsedAt: Date.now(),
+        category: data.category, // Update category in case it changed
+      });
+    } else {
+      // Create new history entry
+      zero.mutate.userGroceryHistory.insert({
+        id: nanoid(),
+        userId: user?.userID ?? "",
+        name: data.name,
+        nameNormalized: data.name.toLowerCase().trim(),
+        category: data.category,
+        language: "en",
+        usageCount: 1,
+        lastUsedAt: Date.now(),
+        createdAt: Date.now(),
+        globalItemId: null, // We could match this to a global item if desired
+      });
+    }
 
     form.resetField("name");
     form.resetField("quantity");
@@ -408,11 +459,16 @@ function RouteComponent() {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormControl>
-                        <Input
+                        <AutocompleteInput
                           id="name-field"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onSelect={handleSuggestionSelect}
                           placeholder="ADD ITEM..."
-                          {...field}
                           className="flex-1 border-2 border-border font-serif font-bold uppercase placeholder:text-muted-foreground text-sm"
+                          zero={zero}
+                          userId={user?.userID ?? ""}
+                          existingItemNames={groceries.map((g) => g.name)}
                         />
                       </FormControl>
                     </FormItem>

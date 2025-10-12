@@ -7,6 +7,7 @@ import {
   timestamp,
   pgEnum,
   primaryKey,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -163,6 +164,38 @@ export const groceries = pgTable("grocery", {
   category: groceryCategory("category").notNull().default("other"),
 });
 
+// Global grocery items - reference data for autocomplete
+export const globalGroceryItems = pgTable("global_grocery_items", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(), // Display name (e.g., "Milk")
+  nameNormalized: text("name_normalized").notNull(), // Lowercase for matching
+  language: text("language").notNull().default("en"), // ISO 639-1 code
+  category: groceryCategory("category").notNull(),
+  popularity: integer("popularity").notNull().default(0), // Global popularity score
+  aliases: jsonb("aliases").$type<string[]>(), // Alternative names as JSON array
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// User grocery history - permanent record for learning and stats
+export const userGroceryHistory = pgTable("user_grocery_history", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  nameNormalized: text("name_normalized").notNull(),
+  category: groceryCategory("category").notNull(),
+  language: text("language").notNull().default("en"),
+  usageCount: integer("usage_count").notNull().default(1), // How many times added
+  lastUsedAt: timestamp("last_used_at").defaultNow().notNull(), // Most recent addition
+  globalItemId: text("global_item_id").references(() => globalGroceryItems.id), // Link if matched
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const groceryListRelations = relations(groceryList, ({ many }) => ({
   members: many(groceryListMembers),
@@ -214,4 +247,26 @@ export const usersRelations = relations(user, ({ many }) => ({
   groceries: many(groceries),
   lists: many(groceryListMembers),
   sentInvitations: many(groceryListInvitations, { relationName: "inviter" }),
+  groceryHistory: many(userGroceryHistory),
 }));
+
+export const globalGroceryItemsRelations = relations(
+  globalGroceryItems,
+  ({ many }) => ({
+    userHistory: many(userGroceryHistory),
+  }),
+);
+
+export const userGroceryHistoryRelations = relations(
+  userGroceryHistory,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [userGroceryHistory.userId],
+      references: [user.id],
+    }),
+    globalItem: one(globalGroceryItems, {
+      fields: [userGroceryHistory.globalItemId],
+      references: [globalGroceryItems.id],
+    }),
+  }),
+);

@@ -9,6 +9,8 @@ export { schema, type Schema };
 
 export type User = Row<typeof schema.tables.user>;
 export type Grocery = Row<typeof schema.tables.groceries>;
+export type GlobalGroceryItem = Row<typeof schema.tables.globalGroceryItems>;
+export type UserGroceryHistory = Row<typeof schema.tables.userGroceryHistory>;
 
 export const permissions = definePermissions<unknown, Schema>(schema, () => ({
   account: ANYONE_CAN_DO_ANYTHING,
@@ -16,6 +18,8 @@ export const permissions = definePermissions<unknown, Schema>(schema, () => ({
   groceryList: ANYONE_CAN_DO_ANYTHING,
   groceryListMembers: ANYONE_CAN_DO_ANYTHING,
   groceryListInvitations: ANYONE_CAN_DO_ANYTHING,
+  globalGroceryItems: ANYONE_CAN_DO_ANYTHING,
+  userGroceryHistory: ANYONE_CAN_DO_ANYTHING,
   jwks: ANYONE_CAN_DO_ANYTHING,
   session: ANYONE_CAN_DO_ANYTHING,
   user: ANYONE_CAN_DO_ANYTHING,

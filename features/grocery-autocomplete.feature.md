@@ -31,120 +31,90 @@ Provide intelligent, fast autocomplete suggestions for grocery items that learn 
 
 ## Technical Approach
 
-### Database Architecture
+### Simplified Zero-First Architecture
 
-#### 1. Global Items Table (`globalGroceryItems`)
-**Purpose**: Curated, crowdsourced database of common grocery items across languages
+**Philosophy**: Keep it simple - one global table, sync entire language dataset to client, let Zero handle the rest.
+
+#### Single Global Items Table (`globalGroceryItems`)
+**Purpose**: Complete database of common grocery items - sync entire language to client
 
 ```typescript
 export const globalGroceryItems = pgTable("global_grocery_items", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(), // Canonical name (e.g., "Milk")
-  nameNormalized: text("name_normalized").notNull(), // Lowercase, trimmed for matching
-  language: text("language").notNull(), // ISO 639-1 code (en, es, fr, etc.)
+  name: text("name").notNull(), // Display name (e.g., "Milk", "Leche", "Mælk")
+  nameNormalized: text("name_normalized").notNull(), // Lowercase for client-side matching
+  language: text("language").notNull(), // ISO 639-1 code (en, es, fr, de, pt, da)
   category: groceryCategory("category").notNull(),
-  usageCount: integer("usage_count").notNull().default(0), // Popularity score
-  translations: jsonb("translations"), // { es: "Leche", fr: "Lait", de: "Milch" }
-  aliases: jsonb("aliases").default([]), // Alternative names: ["whole milk", "2% milk"]
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()),
-});
-
-// Indexes for fast lookups
-CREATE INDEX idx_global_items_lang_norm ON global_grocery_items(language, name_normalized);
-CREATE INDEX idx_global_items_lang_usage ON global_grocery_items(language, usage_count DESC);
-CREATE INDEX idx_global_items_category ON global_grocery_items(language, category);
-```
-
-#### 2. Personal Items Table (`userGroceryHistory`)
-**Purpose**: Track each user's personal vocabulary and preferences
-
-```typescript
-export const userGroceryHistory = pgTable("user_grocery_history", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  name: text("name").notNull(), // User's exact input
-  nameNormalized: text("name_normalized").notNull(),
-  category: groceryCategory("category").notNull(),
-  language: text("language").notNull(),
-  usageCount: integer("usage_count").notNull().default(1),
-  lastUsedAt: timestamp("last_used_at").defaultNow().notNull(),
-  globalItemId: text("global_item_id").references(() => globalGroceryItems.id),
+  popularity: integer("popularity").notNull().default(0), // Global popularity score
+  aliases: text("aliases").array().default([]), // ["whole milk", "2% milk", "skim milk"]
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Indexes for user-specific autocomplete
-CREATE INDEX idx_user_history_user_norm ON user_grocery_history(user_id, name_normalized);
-CREATE INDEX idx_user_history_user_usage ON user_grocery_history(user_id, usage_count DESC, last_used_at DESC);
+// Single composite index for language filtering
+CREATE INDEX idx_global_items_lang ON global_grocery_items(language, name_normalized);
 ```
 
-#### 3. Autocomplete Cache Table (Zero-synced)
-**Purpose**: Pre-computed, language-specific suggestions synced to client
-
-```typescript
-export const groceryAutocomplete = pgTable("grocery_autocomplete", {
-  id: text("id").primaryKey(),
-  language: text("language").notNull(),
-  prefix: text("prefix").notNull(), // First 2-3 chars for efficient filtering
-  suggestions: jsonb("suggestions").notNull(), // Array of top 10 suggestions
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-// Suggestions format:
-type AutocompleteSuggestion = {
-  name: string;
-  category: GroceryCategory;
-  source: 'global' | 'personal' | 'recent';
-  score: number; // Relevance score
-  globalItemId?: string;
-};
-
-// Indexes
-CREATE INDEX idx_autocomplete_lang_prefix ON grocery_autocomplete(language, prefix);
-```
+**That's it!** No pre-computed cache, no complex aggregations, no separate history table.
 
 ### Zero Sync Strategy
 
-**Selective Language Sync**: Only sync autocomplete data for user's language(s)
+**Simple Language-Based Sync**: Zero syncs ALL items for user's language
 
 ```typescript
-// In zero-schema.ts
-export const autocompleteQuery = (language: string) =>
-  zero.query.groceryAutocomplete
-    .where('language', '=', language)
-    .limit(1000); // Limit to top 1000 prefixes
+// In zero-init.tsx - preload entire language dataset
+function preload(z: Zero<Schema>) {
+  const userLanguage = getUserLanguage(); // From browser or settings
 
-// Preload on app init (in zero-init.tsx)
-const userLanguage = navigator.language.split('-')[0]; // 'en' from 'en-US'
-zero.query.groceryAutocomplete
-  .where('language', '=', userLanguage)
-  .preload({ ttl: '10m' });
+  // Sync entire language dataset - Zero handles it efficiently
+  z.query.globalGroceryItems
+    .where('language', '=', userLanguage)
+    .orderBy('popularity', 'desc')
+    .preload({ ttl: '30m' }); // Cache for 30 minutes
+}
 ```
 
-**Hybrid Approach**: Combine local cache + server fallback
-- **Local**: Zero-synced autocomplete cache (instant)
-- **Server**: Real-time query for new/rare items (fallback)
-- **Personal**: Local-first user history (highest priority)
+**How it works**:
+1. Client starts → Zero syncs ~5,000-10,000 items for user's language
+2. All items stored locally in IndexedDB
+3. Autocomplete searches local data (instant, no network)
+4. User changes language → Zero syncs new language dataset
+5. Zero automatically manages data lifecycle
 
-### Autocomplete Algorithm
+**Why this works**:
+- Modern devices can easily handle 10k items in IndexedDB
+- Zero preload is optimized for this use case
+- No complex server queries needed
+- Works offline by default
+- Client-side filtering is faster than server round-trips
 
-**Priority Ranking**:
-1. **Exact user history matches** (100 points)
-2. **Recent user items** (last 30 days, 80 points)
-3. **Frequent user items** (usage count, 60 points)
-4. **Global popular items** (usage count, 40 points)
-5. **Category-based suggestions** (20 points)
+### Client-Side Autocomplete Algorithm
 
-**Scoring Formula**:
+**Simple in-memory filtering** (no server calls):
+
 ```typescript
-score =
-  (userExactMatch ? 100 : 0) +
-  (userRecentBonus * 20) +
-  (userUsageCount * 5) +
-  (globalUsageCount * 0.01) +
-  (sameCategoryBonus * 10) +
-  (prefixMatchLength * 2);
+function getAutocomplete(query: string, items: GlobalGroceryItem[]): Suggestion[] {
+  const normalized = query.toLowerCase().trim();
+
+  if (normalized.length < 2) return [];
+
+  return items
+    .filter(item =>
+      item.nameNormalized.startsWith(normalized) ||
+      item.aliases.some(alias => alias.toLowerCase().startsWith(normalized))
+    )
+    .sort((a, b) => {
+      // Exact match first
+      if (a.nameNormalized === normalized) return -1;
+      if (b.nameNormalized === normalized) return 1;
+
+      // Then by popularity
+      return b.popularity - a.popularity;
+    })
+    .slice(0, 8);
+}
 ```
+
+**That's it!** No scoring formulas, no complex ranking - just simple prefix matching + popularity sort.
 
 ## Use Cases
 
@@ -185,7 +155,8 @@ score =
 **Behavior:**
 - Detect language from browser: `navigator.language` → "en-US" → "en"
 - Override via settings: User can select language manually
-- Zero syncs only relevant language autocomplete data
+- Zero syncs entire dataset for user's language (~5-10k items)
+- Language change triggers new Zero preload for new language
 - Typing "lei" in Portuguese shows "Leite" (milk)
 - Typing "mil" in English shows "Milk"
 - Typing "mæl" in Danish shows "Mælk" (milk)
@@ -194,32 +165,70 @@ score =
 
 **Acceptance Criteria:**
 - [ ] Detect browser language on first load
-- [ ] Store language preference in user settings
-- [ ] Zero query filters by language
-- [ ] Preload only user's language data
+- [ ] Store language preference in user settings (database)
+- [ ] Zero query filters by language: `.where('language', '=', userLang)`
+- [ ] Preload entire language dataset on app start
 - [ ] Show suggestions in correct language
 - [ ] Fallback to English if unsupported language
-- [ ] Display language selector in settings (Phase 2)
+- [ ] Smooth language switcher with immediate feedback
+- [ ] Zero automatically cleans up old language data (TTL)
 
-### 3. Personal Learning
-**As a user**, the app should learn my personal grocery vocabulary over time.
+### 3. Personal Learning (Simplified)
+**As a user**, the app should remember items I frequently use.
 
 **Behavior:**
-- User adds "Organic 2% Milk" → Store in `userGroceryHistory`
-- Next time typing "org" → "Organic 2% Milk" appears first
-- Track usage count: User adds "Bananas" 10 times → Bananas ranks higher
-- Recent items prioritized: Last 30 days boosted in ranking
-- User-specific aliases: User calls it "Coke" but global DB says "Coca-Cola"
-- Personal suggestions marked with "★" icon or "YOUR ITEM" badge
+- Track usage in existing `groceries` table (already has usage data!)
+- Client-side boosting: Items user has added before rank higher in autocomplete
+- Query user's grocery history: `zero.query.groceries.where('authorId', '=', userId)`
+- Combine with global items for ranking:
+  1. Items user has added before (highest priority)
+  2. Global popular items
+- No separate history table needed - reuse existing data!
+
+**Simple Client-Side Algorithm**:
+```typescript
+function getAutocomplete(
+  query: string,
+  globalItems: GlobalGroceryItem[],
+  userGroceries: Grocery[]
+): Suggestion[] {
+  const normalized = query.toLowerCase().trim();
+  if (normalized.length < 2) return [];
+
+  // Get unique items user has added
+  const userItems = new Set(
+    userGroceries.map(g => g.name.toLowerCase())
+  );
+
+  return globalItems
+    .filter(item =>
+      item.nameNormalized.startsWith(normalized) ||
+      item.aliases.some(alias => alias.toLowerCase().startsWith(normalized))
+    )
+    .sort((a, b) => {
+      // User's items always rank higher
+      const aIsUser = userItems.has(a.nameNormalized);
+      const bIsUser = userItems.has(b.nameNormalized);
+      if (aIsUser && !bIsUser) return -1;
+      if (!aIsUser && bIsUser) return 1;
+
+      // Then popularity
+      return b.popularity - a.popularity;
+    })
+    .slice(0, 8)
+    .map(item => ({
+      ...item,
+      isPersonal: userItems.has(item.nameNormalized),
+    }));
+}
+```
 
 **Acceptance Criteria:**
-- [ ] Save every added item to user history
-- [ ] Increment usage count on repeat additions
-- [ ] Update `lastUsedAt` timestamp
-- [ ] Boost recent items (30-day window)
-- [ ] Show personal items above global suggestions
-- [ ] Display "★" or badge for personal items
-- [ ] Handle spelling variations gracefully
+- [ ] Query user's grocery history via Zero
+- [ ] Boost items user has added before
+- [ ] Display "★" badge for personal items
+- [ ] No separate history table - reuse existing groceries table
+- [ ] Works offline (Zero-synced user data)
 
 ### 4. Category Inference
 **As a user**, when I select an autocomplete suggestion, the category should auto-populate.
@@ -243,36 +252,71 @@ score =
 **As a user**, I should be warned if I'm adding a duplicate item.
 
 **Behavior:**
+- Query current list via Zero: `zero.query.groceries.where('listId', '=', listId)`
+- Client-side duplicate check: Compare normalized names
 - User types "Milk" → Autocomplete shows "Milk (already in list)"
 - Duplicate items grayed out in dropdown
 - On submit: Show toast "MILK IS ALREADY IN YOUR LIST"
 - Option to increase quantity instead: "ADD TO EXISTING ITEM?"
 - Normalization: "MILK" = "milk" = "Milk" (case-insensitive)
 
+**Client-Side Duplicate Check:**
+```typescript
+function checkDuplicate(name: string, existingGroceries: Grocery[]): boolean {
+  const normalized = name.toLowerCase().trim();
+  return existingGroceries.some(g => g.name.toLowerCase().trim() === normalized);
+}
+
+// Usage in autocomplete
+const existingGroceries = zero.query.groceries
+  .where('listId', '=', currentListId);
+
+const [groceries] = useQuery(existingGroceries);
+
+const suggestions = getAutocomplete(query, globalItems, userGroceries)
+  .map(item => ({
+    ...item,
+    isInList: checkDuplicate(item.name, groceries),
+  }));
+```
+
 **Acceptance Criteria:**
-- [ ] Detect duplicates via normalized name
+- [ ] Query existing groceries via Zero
+- [ ] Client-side normalized name comparison
 - [ ] Gray out existing items in dropdown
 - [ ] Show "(already in list)" badge
 - [ ] Prevent duplicate addition with toast
 - [ ] Offer to increment quantity instead
 - [ ] Case-insensitive matching
+- [ ] Works offline (Zero-synced data)
 
 ### 6. Offline Support
 **As a user**, autocomplete should work offline using cached data.
 
 **Behavior:**
-- Zero syncs autocomplete cache to IndexedDB
-- Offline: Use only local cache (no server queries)
-- Show "OFFLINE" indicator if limited suggestions
-- When online: Sync new items to server
-- User history stored locally, syncs when back online
+- Zero automatically stores all preloaded data in IndexedDB
+- Offline: All autocomplete is client-side (no server needed!)
+- Global items already in IndexedDB from preload
+- User's grocery history already in IndexedDB from Zero sync
+- Show "OFFLINE" indicator in UI if desired
+- When back online: Zero automatically syncs any changes
+- New items added offline queue for sync when connection restored
+
+**Why It Just Works:**
+- Zero handles all offline persistence automatically
+- Client-side filtering means no network required
+- Both `globalGroceryItems` and `groceries` tables are Zero-synced
+- IndexedDB stores everything locally
+- Zero's conflict resolution handles reconnection
 
 **Acceptance Criteria:**
-- [ ] Autocomplete works offline with cached data
-- [ ] Show offline indicator if needed
-- [ ] Queue new items for sync when back online
-- [ ] User history persists locally
+- [ ] Autocomplete works offline with Zero-cached data
+- [ ] No special offline mode needed (always uses local data)
+- [ ] Show offline indicator in app UI (optional)
+- [ ] Zero queues changes when offline
+- [ ] Auto-sync when connection restored
 - [ ] No errors when offline
+- [ ] Test: Disconnect WiFi → Autocomplete still works
 
 ### 7. Initialize Global Database from External Sources
 **As a system**, I should be able to automatically import and seed grocery data from multiple sources.
@@ -1097,45 +1141,16 @@ async function updateUserLanguage(userId: string, language: string) {
 
 ## API Endpoints
 
-### GET `/api/autocomplete?q={query}&lang={language}`
-**Purpose**: Server-side autocomplete fallback (when local cache insufficient)
+**Note:** With the simplified Zero-first approach, we need VERY FEW server endpoints!
+
+### POST `/api/admin/import/openfoodfacts`
+**Purpose**: Admin tool to import data from OpenFoodFacts (admin only)
 
 **Request:**
 ```typescript
 {
-  q: string; // Search query (min 2 chars)
-  lang: string; // Language code (en, es, etc.)
-  limit?: number; // Max results (default 8)
-}
-```
-
-**Response:**
-```typescript
-{
-  suggestions: Array<{
-    name: string;
-    category: GroceryCategory;
-    source: 'global' | 'personal';
-    score: number;
-    usageCount: number;
-    globalItemId?: string;
-  }>;
-  cached: boolean; // True if from cache, false if computed
-}
-```
-
----
-
-### POST `/api/grocery/track-usage`
-**Purpose**: Track user's item additions for learning
-
-**Request:**
-```typescript
-{
-  name: string;
-  category: GroceryCategory;
-  language: string;
-  globalItemId?: string; // If matched to global item
+  language: string; // Language code (en, es, etc.)
+  limit?: number; // Max items to import (default 1000)
 }
 ```
 
@@ -1143,14 +1158,38 @@ async function updateUserLanguage(userId: string, language: string) {
 ```typescript
 {
   success: boolean;
-  userHistoryId: string;
+  imported: number;
+  skipped: number;
+  errors: string[];
 }
 ```
 
 ---
 
-### POST `/api/admin/seed-global-items`
-**Purpose**: Bulk import global grocery items (admin only)
+### POST `/api/admin/import/wikidata`
+**Purpose**: Admin tool to import data from Wikidata (admin only)
+
+**Request:**
+```typescript
+{
+  limit?: number; // Max items to import (default 1000)
+}
+```
+
+**Response:**
+```typescript
+{
+  success: boolean;
+  imported: number;
+  languages: string[]; // Languages imported
+  errors: string[];
+}
+```
+
+---
+
+### POST `/api/admin/import/csv`
+**Purpose**: Bulk import global grocery items via CSV upload (admin only)
 
 **Request:** FormData with CSV file
 
@@ -1166,26 +1205,36 @@ async function updateUserLanguage(userId: string, language: string) {
 
 ---
 
+**That's it!** No autocomplete endpoint, no usage tracking endpoint - everything else happens client-side via Zero.
+
+---
+
 ## Database Schema
 
-### Full Schema Changes
+### Simplified Schema Changes
+
+**Two new tables: one global reference, one personal history**
 
 ```typescript
 // Add to src/schema.ts
 
+// 1. Global items table - reference data for all users
 export const globalGroceryItems = pgTable("global_grocery_items", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  nameNormalized: text("name_normalized").notNull(),
-  language: text("language").notNull().default('en'),
+  name: text("name").notNull(), // Display name (e.g., "Milk", "Leche", "Mælk")
+  nameNormalized: text("name_normalized").notNull(), // Lowercase for matching
+  language: text("language").notNull(), // ISO 639-1 code (en, es, fr, de, pt, da)
   category: groceryCategory("category").notNull(),
-  usageCount: integer("usage_count").notNull().default(0),
-  translations: jsonb("translations"),
-  aliases: jsonb("aliases").default([]),
+  popularity: integer("popularity").notNull().default(0), // Global popularity score
+  aliases: text("aliases").array().default([]), // ["whole milk", "2% milk"]
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
 });
 
+// 2. User history table - permanent record of what users add (for stats & learning)
 export const userGroceryHistory = pgTable("user_grocery_history", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
@@ -1193,24 +1242,20 @@ export const userGroceryHistory = pgTable("user_grocery_history", {
   nameNormalized: text("name_normalized").notNull(),
   category: groceryCategory("category").notNull(),
   language: text("language").notNull().default('en'),
-  usageCount: integer("usage_count").notNull().default(1),
-  lastUsedAt: timestamp("last_used_at").defaultNow().notNull(),
-  globalItemId: text("global_item_id").references(() => globalGroceryItems.id),
+  usageCount: integer("usage_count").notNull().default(1), // How many times added
+  lastUsedAt: timestamp("last_used_at").defaultNow().notNull(), // Most recent addition
+  globalItemId: text("global_item_id").references(() => globalGroceryItems.id), // Link if matched
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const groceryAutocomplete = pgTable("grocery_autocomplete", {
-  id: text("id").primaryKey(),
-  language: text("language").notNull(),
-  prefix: text("prefix").notNull(),
-  suggestions: jsonb("suggestions").notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+// Composite index for language filtering
+CREATE INDEX idx_global_items_lang_name ON global_grocery_items(language, name_normalized);
+CREATE INDEX idx_user_history_user_name ON user_grocery_history(user_id, name_normalized);
 
-// Add language to user table
+// Optional: Add language preference to user table
 export const user = pgTable("user", {
   // ... existing fields
-  language: text("language").default('en'),
+  language: text("language").default('en').notNull(),
 });
 
 // Relations
@@ -1236,11 +1281,31 @@ export const userGroceryHistoryRelations = relations(
 );
 ```
 
+**Migration:**
+```bash
+bun run create-migration
+# Creates: drizzle/migrations/XXXX_add_grocery_autocomplete_tables.sql
+```
+
+**What happened to the autocomplete cache table?**
+- ❌ `groceryAutocomplete` - **DELETED** (no pre-computed cache needed!)
+- ✅ `globalGroceryItems` - Global reference data
+- ✅ `userGroceryHistory` - Personal permanent history for stats & learning
+
+**Why keep userGroceryHistory separate from groceries table?**
+- `groceries` table: **Active** items on current shopping lists (gets deleted/completed)
+- `userGroceryHistory`: **Permanent** record of everything ever added (for stats, trends, learning)
+- When user adds item → Insert into `groceries` (active list) + Upsert into `userGroceryHistory` (increment usageCount)
+- When user deletes item → Remove from `groceries` only, keep in `userGroceryHistory`
+- Use history for: autocomplete ranking, usage stats, trends over time, "you haven't bought milk in 2 weeks" reminders
+
 ---
 
 ## Zero Sync Configuration
 
 ### Update zero-schema.ts
+
+**Simple permissions - sync entire language dataset + user's history:**
 
 ```typescript
 export const permissions = definePermissions<unknown, Schema>(schema, () => ({
@@ -1248,20 +1313,25 @@ export const permissions = definePermissions<unknown, Schema>(schema, () => ({
 
   globalGroceryItems: {
     row: {
-      select: ['id', 'name', 'category', 'language', 'usageCount'],
-      // Hide translations/aliases from general users (only show relevant language)
+      // All users can read global items for their language
+      select: (row) => row.language === authData.language,
+      // No insert/update/delete for regular users (admin-only via API)
+      insert: false,
+      update: false,
+      delete: false,
     },
   },
 
   userGroceryHistory: {
     row: {
-      select: (row) => row.userId === authData.userId, // User can only see their own
-    },
-  },
-
-  groceryAutocomplete: {
-    row: {
-      select: (row) => row.language === authData.language, // Only sync user's language
+      // Users can only see their own history
+      select: (row) => row.userId === authData.userId,
+      // Users can insert their own records (auto-tracked on grocery add)
+      insert: (row) => row.userId === authData.userId,
+      // Users can update their own records
+      update: (row) => row.userId === authData.userId,
+      // No delete (permanent history)
+      delete: false,
     },
   },
 }));
@@ -1269,24 +1339,48 @@ export const permissions = definePermissions<unknown, Schema>(schema, () => ({
 
 ### Preload Strategy (zero-init.tsx)
 
+**Simplified preload - just two queries:**
+
 ```typescript
 function preload(z: Zero<Schema>) {
   setTimeout(() => {
-    const userLanguage = getUserLanguage(); // Detect from browser or user settings
+    const userLanguage = getUserLanguage(); // Detect from browser or user settings (default: 'en')
+    const userId = authData?.userId;
 
-    // Preload autocomplete cache for user's language
-    z.query.groceryAutocomplete
+    // 1. Preload ENTIRE global item database for user's language (~5-10k items)
+    z.query.globalGroceryItems
       .where('language', '=', userLanguage)
-      .limit(500) // Top 500 prefixes
-      .preload({ ttl: '10m' });
+      .orderBy('popularity', 'desc')
+      .preload({ ttl: '30m' }); // Cache for 30 minutes
 
-    // Preload user's personal history
-    z.query.userGroceryHistory
-      .where('userId', '=', authData.userId)
-      .orderBy('lastUsedAt', 'desc')
-      .limit(100) // Last 100 items
-      .preload({ ttl: '5m' });
+    // 2. Preload user's personal history (if authenticated)
+    if (userId) {
+      z.query.userGroceryHistory
+        .where('userId', '=', userId)
+        .orderBy('lastUsedAt', 'desc')
+        .preload({ ttl: '10m' }); // Cache for 10 minutes
+    }
   }, 1000);
+}
+```
+
+**That's it!** Zero handles:
+- Syncing all ~10k items for user's language to IndexedDB
+- Keeping data fresh with TTL
+- Cleaning up old data when TTL expires
+- Re-syncing when language changes
+- Offline persistence automatically
+
+**On language change:**
+```typescript
+function handleLanguageChange(newLanguage: string) {
+  // Zero automatically syncs new language dataset
+  zero.query.globalGroceryItems
+    .where('language', '=', newLanguage)
+    .orderBy('popularity', 'desc')
+    .preload({ ttl: '30m' });
+
+  // Old language data automatically cleaned up by Zero's TTL
 }
 ```
 
@@ -1464,72 +1558,40 @@ export function rankSuggestions(
 
 ## Background Jobs
 
-### 1. Autocomplete Cache Builder (Cron Job)
+**With the simplified approach, we need VERY FEW background jobs!**
+
+### 1. Global Item Popularity Updater (Optional)
 
 ```typescript
-// Run every 6 hours
-export async function buildAutocompleteCache(language: string) {
-  const prefixes = generatePrefixes(); // ['a', 'ab', 'abc', ..., 'z', 'za', 'zab']
-
-  for (const prefix of prefixes) {
-    const globalItems = await db
-      .select()
-      .from(globalGroceryItems)
-      .where(and(
-        eq(globalGroceryItems.language, language),
-        like(globalGroceryItems.nameNormalized, `${prefix}%`)
-      ))
-      .orderBy(desc(globalGroceryItems.usageCount))
-      .limit(10);
-
-    const suggestions = globalItems.map(item => ({
-      name: item.name,
-      category: item.category,
-      source: 'global' as const,
-      score: item.usageCount * 0.01,
-      globalItemId: item.id,
-    }));
-
-    await db
-      .insert(groceryAutocomplete)
-      .values({
-        id: nanoid(),
-        language,
-        prefix,
-        suggestions,
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: [groceryAutocomplete.language, groceryAutocomplete.prefix],
-        set: { suggestions, updatedAt: new Date() },
-      });
-  }
-}
-```
-
-### 2. Global Item Usage Updater
-
-```typescript
-// Run daily
-export async function updateGlobalItemUsage() {
-  // Aggregate user history to update global usage counts
-  const usageCounts = await db
+// Run daily (optional - only if you want to sync popularity from userGroceryHistory)
+export async function updateGlobalItemPopularity() {
+  // Aggregate user history to update global popularity scores
+  const popularityCounts = await db
     .select({
       globalItemId: userGroceryHistory.globalItemId,
-      totalUsage: sql`SUM(${userGroceryHistory.usageCount})`,
+      totalUsage: sql<number>`SUM(${userGroceryHistory.usageCount})`,
     })
     .from(userGroceryHistory)
     .where(isNotNull(userGroceryHistory.globalItemId))
     .groupBy(userGroceryHistory.globalItemId);
 
-  for (const { globalItemId, totalUsage } of usageCounts) {
+  for (const { globalItemId, totalUsage } of popularityCounts) {
     await db
       .update(globalGroceryItems)
-      .set({ usageCount: totalUsage })
+      .set({ popularity: totalUsage })
       .where(eq(globalGroceryItems.id, globalItemId));
   }
+
+  console.log(`Updated popularity for ${popularityCounts.length} items`);
 }
 ```
+
+**Note:** This job is optional! You can alternatively:
+- Set popularity during initial import from OpenFoodFacts (using `unique_scans_n`)
+- Keep it static
+- Only run this monthly/quarterly if needed
+
+**That's it!** No cache building needed since everything is client-side.
 
 ---
 
