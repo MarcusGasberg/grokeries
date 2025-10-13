@@ -19,6 +19,7 @@ import { z } from "zod";
 import { useShoppingStore } from "@/stores/shopping-store";
 import { useEffect, useState, useRef } from "react";
 import { Confetti } from "@/components/confetti";
+import { nanoid } from "nanoid";
 
 const shoppingSearchSchema = z.object({
   listId: z.string().optional(),
@@ -191,14 +192,49 @@ function RouteComponent() {
     }
   }, [completedCount, totalCount, listId, router, endShopping]);
 
-  const toggleItem = (id: string) => {
+  const toggleItem = async (id: string) => {
     const item = groceries.find((item) => item.id === id);
-    if (item) {
-      zero.mutate.groceries.update({
-        id: item.id,
-        completed: !item.completed,
-        updatedAt: Date.now(),
-      });
+    if (!item || !user) return;
+
+    // Update the item completion status
+    zero.mutate.groceries.update({
+      id: item.id,
+      completed: !item.completed,
+      updatedAt: Date.now(),
+    });
+
+    // Track in user history when marking as complete
+    if (!item.completed) {
+      const historyQuery = zero.query.userGroceryHistory
+        .where("userId", "=", user.userID)
+        .where("nameNormalized", "=", item.name.toLowerCase().trim());
+
+      const [existingHistory] = await historyQuery.run();
+
+      if (existingHistory && existingHistory.length > 0) {
+        // Update existing history entry
+        const history = existingHistory[0];
+        zero.mutate.userGroceryHistory.update({
+          id: history.id,
+          usageCount: history.usageCount + 1,
+          lastUsedAt: Date.now(),
+          category: item.category,
+        });
+      } else {
+        // Create new history entry
+        zero.mutate.userGroceryHistory.insert({
+          id: nanoid(),
+          userId: user.userID,
+          name: item.name,
+          nameNormalized: item.name.toLowerCase().trim(),
+          category: item.category,
+          language: "en",
+          usageCount: 1,
+          lastUsedAt: Date.now(),
+          createdAt: Date.now(),
+          globalItemId: null,
+        });
+      }
     }
   };
 

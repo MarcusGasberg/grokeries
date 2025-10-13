@@ -57,53 +57,79 @@ export function AutocompleteInput({
 
   // Compute suggestions
   const suggestions = useMemo(() => {
+    const existingSet = new Set(existingItemNames.map((n) => n.toLowerCase()));
+
     // If no query, show popular items from user history and global
     if (debouncedValue.length === 0) {
-      const personalItems = (userHistory ?? []).slice(0, 5).map((item) => ({
-        id: item.id,
-        name: item.name,
-        nameNormalized: item.nameNormalized,
-        category: item.category,
-        source: "personal" as const,
-        score: (item.usageCount ?? 0) * 10,
-        usageCount: item.usageCount ?? 0,
-        isInList: existingItemNames
-          .map((n) => n.toLowerCase())
-          .includes(item.nameNormalized),
-        globalItemId: item.globalItemId ?? undefined,
-      }));
+      const seenNormalized = new Set<string>();
+      const personalItems: AutocompleteSuggestion[] = [];
 
-      const globalPopular = (globalItems ?? [])
-        .filter(
-          (item) =>
-            !personalItems.some(
-              (p) => p.nameNormalized === item.nameNormalized,
-            ),
-        )
-        .slice(0, 8 - personalItems.length)
-        .map((item) => ({
+      // Get top personal items, deduplicating by normalized name
+      for (const item of userHistory ?? []) {
+        if (seenNormalized.has(item.nameNormalized)) {
+          continue;
+        }
+        seenNormalized.add(item.nameNormalized);
+
+        const isInList = existingSet.has(item.nameNormalized);
+        personalItems.push({
+          id: item.id,
+          name: item.name,
+          nameNormalized: item.nameNormalized,
+          category: item.category,
+          source: "personal" as const,
+          score: isInList ? -1000 : (item.usageCount ?? 0) * 10,
+          usageCount: item.usageCount ?? 0,
+          isInList,
+          globalItemId: item.globalItemId ?? undefined,
+        });
+
+        if (personalItems.length >= 5) break;
+      }
+
+      const globalPopular: AutocompleteSuggestion[] = [];
+
+      // Get top global items, deduplicating by normalized name
+      for (const item of globalItems ?? []) {
+        if (seenNormalized.has(item.nameNormalized)) {
+          continue;
+        }
+        seenNormalized.add(item.nameNormalized);
+
+        const isInList = existingSet.has(item.nameNormalized);
+        globalPopular.push({
           id: item.id,
           name: item.name,
           nameNormalized: item.nameNormalized,
           category: item.category,
           source: "global" as const,
-          score: item.popularity ?? 0,
+          score: isInList ? -1000 : (item.popularity ?? 0),
           usageCount: 0,
-          isInList: existingItemNames
-            .map((n) => n.toLowerCase())
-            .includes(item.nameNormalized),
+          isInList,
           globalItemId: item.id,
-        }));
+        });
 
-      return [...personalItems, ...globalPopular].slice(0, 8);
+        if (globalPopular.length >= (8 - personalItems.length)) break;
+      }
+
+      return [...personalItems, ...globalPopular]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8);
     }
 
-    return rankSuggestions(
+    const ranked = rankSuggestions(
       debouncedValue,
       globalItems ?? [],
       userHistory ?? [],
       existingItemNames,
     );
+
+    // Sort so items already in list appear last
+    return ranked.sort((a, b) => {
+      if (a.isInList && !b.isInList) return 1;
+      if (!a.isInList && b.isInList) return -1;
+      return b.score - a.score;
+    });
   }, [debouncedValue, globalItems, userHistory, existingItemNames]);
 
   // Close dropdown when clicking outside
@@ -139,12 +165,14 @@ export function AutocompleteInput({
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
+        setShowDropdown(true);
         setSelectedIndex((prev) =>
           prev < suggestions.length - 1 ? prev + 1 : prev,
         );
         break;
       case "ArrowUp":
         e.preventDefault();
+        setShowDropdown(true);
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
         break;
       case "Enter":
@@ -162,8 +190,6 @@ export function AutocompleteInput({
         setShowDropdown(false);
         setSelectedIndex(-1);
         break;
-      default:
-        setShowDropdown(true);
     }
   };
 
@@ -198,7 +224,6 @@ export function AutocompleteInput({
         onKeyDown={handleKeyDown}
         onFocus={() => {
           setIsInputFocused(true);
-          console.log("FOCUS");
           if (suggestions.length > 0) {
             setShowDropdown(true);
           }

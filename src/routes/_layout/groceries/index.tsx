@@ -250,8 +250,8 @@ function RouteComponent() {
   const selectedCategory = form.watch("category");
 
   const handleSuggestionSelect = (suggestion: AutocompleteSuggestion) => {
-    form.setValue("name", suggestion.name);
-    form.setValue("category", suggestion.category as GroceryCategory);
+    form.setValue("name", suggestion.name, { shouldDirty: true, shouldValidate: true });
+    form.setValue("category", suggestion.category as GroceryCategory, { shouldDirty: true });
   };
 
   const addItem = async (data: GroceryFormValue) => {
@@ -312,6 +312,16 @@ function RouteComponent() {
 
     form.resetField("name");
     form.resetField("quantity");
+
+    // Temporarily blur the input to prevent autocomplete from showing immediately
+    const nameInput = document.getElementById("name-field") as HTMLInputElement;
+    if (nameInput) {
+      nameInput.blur();
+      // Re-focus after a short delay so user can continue typing
+      setTimeout(() => {
+        nameInput.focus();
+      }, 100);
+    }
   };
 
   const completedCount = groceries.filter((item) => item.completed).length;
