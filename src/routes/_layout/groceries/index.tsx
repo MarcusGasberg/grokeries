@@ -562,11 +562,9 @@ function RouteComponent() {
                     ? "opacity-60 bg-muted border-muted-foreground"
                     : "bg-card border-primary hover:bg-card/90"
                 }`}
-                style={
-                  {
-                    viewTransitionName: `item-${item.id}`,
-                  } as React.CSSProperties
-                }
+                style={{
+                  "viewTransitionName": `item-${item.id}`,
+                }}
               >
                 <CardContent className="p-2">
                   <div className="flex items-center gap-2">

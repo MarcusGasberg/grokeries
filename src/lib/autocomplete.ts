@@ -36,7 +36,7 @@ export function rankSuggestions(
 ): AutocompleteSuggestion[] {
   const queryNorm = query.toLowerCase().trim();
 
-  if (queryNorm.length < 2) {
+  if (queryNorm.length === 0) {
     return [];
   }
 

@@ -40,6 +40,7 @@ export function AutocompleteInput({
   const debouncedValue = useDebounce(value, 150);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const justSelectedRef = useRef(false);
 
   // Query global grocery items
   const globalItemsQuery = zero.query.globalGroceryItems
@@ -157,6 +158,13 @@ export function AutocompleteInput({
     setSelectedIndex(-1);
   }, [suggestions]);
 
+  // Show dropdown when input is focused and suggestions are available
+  useEffect(() => {
+    if (isInputFocused && suggestions.length > 0 && !justSelectedRef.current) {
+      setShowDropdown(true);
+    }
+  }, [isInputFocused, suggestions.length]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (suggestions.length === 0) {
       return;
@@ -194,9 +202,14 @@ export function AutocompleteInput({
   };
 
   const handleSelectSuggestion = (suggestion: AutocompleteSuggestion) => {
+    justSelectedRef.current = true;
     onSelect(suggestion);
     setShowDropdown(false);
     setSelectedIndex(-1);
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      justSelectedRef.current = false;
+    }, 300);
   };
 
   const getCategoryIcon = (category: string): string => {
@@ -220,7 +233,11 @@ export function AutocompleteInput({
         ref={inputRef}
         id={id}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          // User is typing, allow dropdown to reopen
+          justSelectedRef.current = false;
+          onChange(e.target.value);
+        }}
         onKeyDown={handleKeyDown}
         onFocus={() => {
           setIsInputFocused(true);

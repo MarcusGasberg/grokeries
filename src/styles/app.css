@@ -139,29 +139,76 @@
   navigation: auto;
 }
 
-/* Allow dynamic view-transition-name via inline styles */
-@supports (view-transition-name: auto) {
-  /* Items with view-transition-name will automatically participate in transitions */
-}
-
 /* Default root transition - faster, smoother */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.3s;
-  animation-timing-function: ease-in-out;
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Individual item transitions - morph smoothly */
-::view-transition-group(*) {
-  animation-timing-function: ease-in-out;
+/* Forward navigation - slide left */
+html:active-view-transition-type(forward) {
+  &::view-transition-old(root) {
+    animation-name: slide-out-left;
+  }
+  &::view-transition-new(root) {
+    animation-name: slide-in-right;
+  }
 }
 
-::view-transition-old(*),
-::view-transition-new(*) {
+/* Back navigation - slide right */
+html:active-view-transition-type(back) {
+  &::view-transition-old(root) {
+    animation-name: slide-out-right;
+  }
+  &::view-transition-new(root) {
+    animation-name: slide-in-left;
+  }
+}
+
+/* Individual item transitions - smooth morphing */
+::view-transition-group(*:not(root)) {
   animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(*:not(root)),
+::view-transition-new(*:not(root)) {
+  height: 100%;
+  overflow: clip;
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Animations */
+@keyframes slide-out-left {
+  to {
+    opacity: 0;
+    transform: translateX(-10%);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(10%);
+  }
+}
+
+@keyframes slide-out-right {
+  to {
+    opacity: 0;
+    transform: translateX(10%);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-10%);
+  }
+}
+
 @keyframes fade-out-scale {
   to {
     opacity: 0;

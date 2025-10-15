@@ -100,7 +100,8 @@ function RouteComponent() {
   const { zero, session } = router.options.context;
   const user = session?.data;
   const { listId } = Route.useSearch();
-  const { startShopping, endShopping, categoryFilter, setCategoryFilter } = useShoppingStore();
+  const { startShopping, endShopping, categoryFilter, setCategoryFilter } =
+    useShoppingStore();
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showCompletionOverlay, setShowCompletionOverlay] = useState(false);
@@ -127,7 +128,7 @@ function RouteComponent() {
 
   // Get unique categories from current list items
   const availableCategories = categories.filter((cat) =>
-    groceries.some((item) => item.category === cat.value)
+    groceries.some((item) => item.category === cat.value),
   );
 
   // Filter and sort items based on category filter
@@ -135,7 +136,9 @@ function RouteComponent() {
     if (!categoryFilter) return items;
 
     const matching = items.filter((item) => item.category === categoryFilter);
-    const nonMatching = items.filter((item) => item.category !== categoryFilter);
+    const nonMatching = items.filter(
+      (item) => item.category !== categoryFilter,
+    );
 
     return [...matching, ...nonMatching];
   };
@@ -425,7 +428,8 @@ function RouteComponent() {
         ) : (
           filteredUncompletedItems.map((item) => {
             const categoryInfo = getCategoryInfo(item.category);
-            const isMatchingFilter = !categoryFilter || item.category === categoryFilter;
+            const isMatchingFilter =
+              !categoryFilter || item.category === categoryFilter;
             const dimmed = !isMatchingFilter;
 
             return (
@@ -435,11 +439,9 @@ function RouteComponent() {
                 className={`transition-all duration-200 border-2 shadow-[3px_3px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] bg-card border-primary hover:bg-card/90 cursor-pointer ${
                   dimmed ? "opacity-50" : "opacity-100"
                 }`}
-                style={
-                  {
-                    viewTransitionName: `item-${item.id}`,
-                  } as React.CSSProperties
-                }
+                style={{
+                  viewTransitionName: `item-${item.id}`,
+                }}
               >
                 <CardContent className="p-3">
                   <div className="flex items-center gap-3">
@@ -484,7 +486,8 @@ function RouteComponent() {
           </p>
           {filteredCompletedItems.map((item) => {
             const categoryInfo = getCategoryInfo(item.category);
-            const isMatchingFilter = !categoryFilter || item.category === categoryFilter;
+            const isMatchingFilter =
+              !categoryFilter || item.category === categoryFilter;
             const dimmed = !isMatchingFilter;
 
             return (
@@ -494,11 +497,9 @@ function RouteComponent() {
                 className={`relative transition-all duration-200 border-2 shadow-[2px_2px_0px_0px_var(--ring)] hover:shadow-[1px_1px_0px_0px_var(--ring)] bg-muted border-muted-foreground cursor-pointer overflow-hidden ${
                   dimmed ? "opacity-30" : "opacity-50"
                 }`}
-                style={
-                  {
-                    viewTransitionName: `item-${item.id}`,
-                  } as React.CSSProperties
-                }
+                style={{
+                  viewTransitionName: `item-${item.id}`,
+                }}
               >
                 <CardContent className="p-2">
                   <div className="flex items-center gap-2">
