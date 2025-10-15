@@ -9,6 +9,7 @@ import {
 import type { Zero } from "@rocicorp/zero";
 import type { Schema } from "@/zero/zero-schema";
 import { useTranslation } from "react-i18next";
+import { getNormalizedLanguage } from "@/lib/language-utils";
 
 interface AutocompleteInputProps {
   value: string;
@@ -35,7 +36,7 @@ export function AutocompleteInput({
   disabled,
   id,
 }: AutocompleteInputProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -44,16 +45,20 @@ export function AutocompleteInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const justSelectedRef = useRef(false);
 
-  // Query global grocery items
+  // Get current language from i18next with fallback to 'en'
+  const currentLanguage = getNormalizedLanguage(i18n.language);
+
+  // Query global grocery items filtered by current language
   const globalItemsQuery = zero.query.globalGroceryItems
-    .where("language", "=", "en")
+    .where("language", "=", currentLanguage)
     .orderBy("popularity", "desc");
 
   const [globalItems] = useQuery(globalItemsQuery);
 
-  // Query user's history
+  // Query user's history filtered by current language
   const userHistoryQuery = zero.query.userGroceryHistory
     .where("userId", "=", userId)
+    .where("language", "=", currentLanguage)
     .orderBy("lastUsedAt", "desc");
 
   const [userHistory] = useQuery(userHistoryQuery);

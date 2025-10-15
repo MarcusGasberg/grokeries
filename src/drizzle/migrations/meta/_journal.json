@@ -43,6 +43,13 @@
       "when": 1760260138999,
       "tag": "0005_loving_red_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1760553955712,
+      "tag": "0006_spooky_annihilus",
+      "breakpoints": true
     }
   ]
 }

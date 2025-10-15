@@ -21,6 +21,7 @@ import { useEffect, useState, useRef } from "react";
 import { Confetti } from "@/components/confetti";
 import { nanoid } from "nanoid";
 import { useTranslation } from "react-i18next";
+import { getNormalizedLanguage } from "@/lib/language-utils";
 
 const shoppingSearchSchema = z.object({
   listId: z.string().optional(),
@@ -97,7 +98,7 @@ const categories: Category[] = [
 ] as const;
 
 function RouteComponent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { zero, session } = router.options.context;
   const user = session?.data;
@@ -226,14 +227,16 @@ function RouteComponent() {
           category: item.category,
         });
       } else {
-        // Create new history entry
+        // Create new history entry with current language (with fallback to 'en')
+        const language = getNormalizedLanguage(i18n.language);
+
         zero.mutate.userGroceryHistory.insert({
           id: nanoid(),
           userId: user.userID,
           name: item.name,
           nameNormalized: item.name.toLowerCase().trim(),
           category: item.category,
-          language: "en",
+          language,
           usageCount: 1,
           lastUsedAt: Date.now(),
           createdAt: Date.now(),

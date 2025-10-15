@@ -43,52 +43,84 @@ function parseCsv(content: string): CsvRow[] {
   });
 }
 
-async function seedGlobalItems() {
-  console.log("Starting global grocery items seed...");
+async function seedLanguage(language: string) {
+  console.log(`\n📦 Seeding ${language.toUpperCase()} items...`);
 
-  const csvPath = join(process.cwd(), "seed-data", "global-items-en.csv");
-  const csvContent = readFileSync(csvPath, "utf-8");
-  const rows = parseCsv(csvContent);
+  const csvPath = join(process.cwd(), "seed-data", `global-items-${language}.csv`);
 
-  console.log(`Found ${rows.length} items to import`);
+  try {
+    const csvContent = readFileSync(csvPath, "utf-8");
+    const rows = parseCsv(csvContent);
 
-  let imported = 0;
-  let skipped = 0;
+    console.log(`   Found ${rows.length} items to import`);
 
-  for (const row of rows) {
-    try {
-      const aliases = row.aliases
-        ? row.aliases.replace(/^"|"$/g, "").split("|")
-        : [];
+    let imported = 0;
+    let skipped = 0;
 
-      await db
-        .insert(globalGroceryItems)
-        .values({
-          id: nanoid(),
-          name: row.name,
-          nameNormalized: row.name.toLowerCase().trim(),
-          language: "en",
-          category: row.category as any,
-          popularity: parseInt(row.popularity, 10),
-          aliases,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .onConflictDoNothing();
+    for (const row of rows) {
+      try {
+        const aliases = row.aliases
+          ? row.aliases.replace(/^"|"$/g, "").split("|")
+          : [];
 
-      imported++;
-      if (imported % 10 === 0) {
-        console.log(`Imported ${imported}/${rows.length} items...`);
+        await db
+          .insert(globalGroceryItems)
+          .values({
+            id: nanoid(),
+            name: row.name,
+            nameNormalized: row.name.toLowerCase().trim(),
+            language,
+            category: row.category as any,
+            popularity: parseInt(row.popularity, 10),
+            aliases,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .onConflictDoNothing();
+
+        imported++;
+        if (imported % 20 === 0) {
+          console.log(`   Imported ${imported}/${rows.length} items...`);
+        }
+      } catch (error) {
+        console.error(`   Failed to import ${row.name}:`, error);
+        skipped++;
       }
-    } catch (error) {
-      console.error(`Failed to import ${row.name}:`, error);
-      skipped++;
     }
+
+    console.log(`   ✅ ${language.toUpperCase()} complete!`);
+    console.log(`      Imported: ${imported}`);
+    console.log(`      Skipped: ${skipped}`);
+
+    return { imported, skipped };
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      console.log(`   ⚠️  No CSV file found for ${language} (${csvPath})`);
+      return { imported: 0, skipped: 0 };
+    }
+    throw error;
+  }
+}
+
+async function seedGlobalItems() {
+  console.log("🌍 Starting global grocery items seed...\n");
+
+  // Supported languages matching SUPPORTED_LANGUAGES from language-utils.ts
+  const languages = ['en', 'da', 'es', 'fr', 'de', 'pt'];
+
+  let totalImported = 0;
+  let totalSkipped = 0;
+
+  for (const language of languages) {
+    const { imported, skipped } = await seedLanguage(language);
+    totalImported += imported;
+    totalSkipped += skipped;
   }
 
-  console.log(`✅ Import complete!`);
-  console.log(`   Imported: ${imported}`);
-  console.log(`   Skipped: ${skipped}`);
+  console.log(`\n🎉 All imports complete!`);
+  console.log(`   Total imported: ${totalImported}`);
+  console.log(`   Total skipped: ${totalSkipped}`);
+  console.log(`   Languages processed: ${languages.join(', ')}`);
 }
 
 seedGlobalItems()

@@ -714,6 +714,15 @@ export const schema = {
             "image"
           >,
         },
+        language: {
+          type: "string",
+          optional: true,
+          customType: null as unknown as ZeroCustomType<
+            ZeroSchema,
+            "user",
+            "language"
+          >,
+        },
         createdAt: {
           type: "number",
           optional: true,
