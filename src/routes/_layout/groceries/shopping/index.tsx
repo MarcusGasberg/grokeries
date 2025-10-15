@@ -20,6 +20,7 @@ import { useShoppingStore } from "@/stores/shopping-store";
 import { useEffect, useState, useRef } from "react";
 import { Confetti } from "@/components/confetti";
 import { nanoid } from "nanoid";
+import { useTranslation } from "react-i18next";
 
 const shoppingSearchSchema = z.object({
   listId: z.string().optional(),
@@ -96,6 +97,7 @@ const categories: Category[] = [
 ] as const;
 
 function RouteComponent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { zero, session } = router.options.context;
   const user = session?.data;
@@ -295,10 +297,10 @@ function RouteComponent() {
           <div className="bg-accent text-accent-foreground p-12 border-8 border-accent-foreground shadow-[12px_12px_0px_0px_rgba(0,0,0,0.8)] animate-[bounce_0.5s_ease-in-out]">
             <div className="text-center">
               <p className="text-5xl font-black font-sans uppercase tracking-tight mb-4">
-                SHOPPING COMPLETE!
+                {t("groceries:shopping.completionOverlay")}
               </p>
               <p className="text-2xl font-bold font-serif uppercase tracking-wide">
-                MAXIMUM EFFICIENCY ACHIEVED
+                {t("groceries:shopping.completionOverlaySubtitle")}
               </p>
             </div>
           </div>
@@ -323,10 +325,10 @@ function RouteComponent() {
               </div>
               <div>
                 <h1 className="text-xl font-black font-sans tracking-tight uppercase">
-                  SHOPPING MODE
+                  {t("groceries:shopping.mode")}
                 </h1>
                 <p className="text-xs font-bold font-serif uppercase tracking-wide opacity-90">
-                  {list?.name || "LOADING..."}
+                  {list?.name || t("groceries:shopping.loading")}
                 </p>
               </div>
             </div>
@@ -344,7 +346,7 @@ function RouteComponent() {
           <div className="bg-primary-foreground/10 p-3 border-2 border-primary-foreground/20">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-black font-sans uppercase tracking-wide">
-                PROGRESS
+                {t("groceries:shopping.progress")}
               </span>
               <span className="text-lg font-black font-mono">
                 {completedCount}/{totalCount}
@@ -376,7 +378,7 @@ function RouteComponent() {
                     : "bg-background text-foreground border-muted-foreground hover:border-primary"
                 }`}
               >
-                📋 ALL ITEMS
+                {t("groceries:shopping.allItems")}
               </button>
 
               {/* Category Chips */}
@@ -392,7 +394,7 @@ function RouteComponent() {
                         : `bg-background text-foreground border-4 border-muted-foreground hover:${cat.color.split(" ")[0]}`
                     }`}
                   >
-                    {cat.name}
+                    {t(`groceries:form.categories.${cat.value}`)}
                   </button>
                 );
               })}
@@ -407,10 +409,10 @@ function RouteComponent() {
           <Card className="border-4 border-dashed border-muted-foreground">
             <CardContent className="p-8 text-center">
               <p className="font-black font-sans uppercase text-lg text-muted-foreground">
-                NO ITEMS TO SHOP
+                {t("groceries:shopping.noItems")}
               </p>
               <p className="text-sm font-bold font-serif uppercase text-muted-foreground/70 mt-1">
-                GO BACK TO ADD ITEMS
+                {t("groceries:shopping.noItemsDescription")}
               </p>
             </CardContent>
           </Card>
@@ -418,10 +420,10 @@ function RouteComponent() {
           <Card className="border-4 border-accent bg-accent text-accent-foreground">
             <CardContent className="p-8 text-center">
               <p className="font-black font-sans uppercase text-xl">
-                ALL ITEMS COMPLETE!
+                {t("groceries:shopping.allComplete")}
               </p>
               <p className="text-sm font-bold font-serif uppercase mt-1">
-                SHOPPING DOMINATION ACHIEVED
+                {t("groceries:shopping.allCompleteDescription")}
               </p>
             </CardContent>
           </Card>
@@ -461,11 +463,11 @@ function RouteComponent() {
                         <Badge
                           className={`text-xs font-black font-sans uppercase tracking-wide ${categoryInfo.color}`}
                         >
-                          {categoryInfo.name}
+                          {t(`groceries:form.categories.${categoryInfo.value}`)}
                         </Badge>
                         {item.quantity && (
                           <span className="text-sm font-bold font-mono text-muted-foreground">
-                            QTY: {item.quantity}
+                            {t("groceries:shopping.quantity", { quantity: item.quantity })}
                           </span>
                         )}
                       </div>
@@ -482,7 +484,7 @@ function RouteComponent() {
       {completedItems.length > 0 && (
         <div className="space-y-3 mt-8 pt-8 border-t-4 border-dashed border-muted-foreground">
           <p className="text-sm font-black font-sans uppercase tracking-wide text-muted-foreground mb-4">
-            COMPLETED ({completedItems.length})
+            {t("groceries:shopping.completedSection", { count: completedItems.length })}
           </p>
           {filteredCompletedItems.map((item) => {
             const categoryInfo = getCategoryInfo(item.category);
@@ -517,7 +519,7 @@ function RouteComponent() {
                       <Badge
                         className={`text-[10px] font-black font-sans uppercase tracking-wide ${categoryInfo.color} opacity-70 flex-shrink-0`}
                       >
-                        {item.category}
+                        {t(`groceries:form.categories.${item.category}`)}
                       </Badge>
                       {item.quantity && (
                         <span className="text-[10px] font-bold font-mono text-muted-foreground flex-shrink-0">
@@ -553,10 +555,10 @@ function RouteComponent() {
         <DialogContent className="border-4 border-primary shadow-[8px_8px_0px_0px_var(--ring)]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black font-sans uppercase tracking-tight">
-              EXIT SHOPPING MODE?
+              {t("groceries:shopping.exitConfirmTitle")}
             </DialogTitle>
             <DialogDescription className="text-base font-bold font-serif uppercase text-muted-foreground">
-              You still have {uncompletedItems.length} uncompleted items
+              {t("groceries:shopping.exitConfirmDescription", { count: uncompletedItems.length })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
@@ -565,14 +567,14 @@ function RouteComponent() {
               onClick={() => setShowExitConfirmation(false)}
               className="font-black font-sans uppercase border-2 shadow-[2px_2px_0px_0px_var(--ring)]"
             >
-              KEEP SHOPPING
+              {t("groceries:shopping.keepShopping")}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmExit}
               className="font-black font-sans uppercase border-2 border-destructive shadow-[2px_2px_0px_0px_var(--ring)]"
             >
-              EXIT ANYWAY
+              {t("groceries:shopping.exitAnyway")}
             </Button>
           </DialogFooter>
         </DialogContent>

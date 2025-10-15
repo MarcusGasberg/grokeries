@@ -593,7 +593,7 @@ function RouteComponent() {
                       <Badge
                         className={`text-[10px] font-black font-sans uppercase tracking-wide ${categoryInfo.color} flex-shrink-0`}
                       >
-                        {item.category}
+                        {t(`groceries:form.categories.${item.category}`)}
                       </Badge>
                       {item.quantity && (
                         <span className="text-[10px] font-bold font-mono text-muted-foreground flex-shrink-0">
