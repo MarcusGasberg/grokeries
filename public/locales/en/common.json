@@ -1,0 +1,19 @@
+{
+  "app": {
+    "name": "GROKERIES",
+    "tagline": "EFFICIENT SHOPPING"
+  },
+  "nav": {
+    "groceries": "GROCERIES",
+    "shopping": "SHOPPING",
+    "settings": "SETTINGS"
+  },
+  "actions": {
+    "add": "ADD",
+    "delete": "DELETE",
+    "edit": "EDIT",
+    "save": "SAVE",
+    "cancel": "CANCEL",
+    "confirm": "CONFIRM"
+  }
+}

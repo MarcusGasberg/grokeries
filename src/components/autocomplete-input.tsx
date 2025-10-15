@@ -8,6 +8,7 @@ import {
 } from "@/lib/autocomplete";
 import type { Zero } from "@rocicorp/zero";
 import type { Schema } from "@/zero/zero-schema";
+import { useTranslation } from "react-i18next";
 
 interface AutocompleteInputProps {
   value: string;
@@ -34,6 +35,7 @@ export function AutocompleteInput({
   disabled,
   id,
 }: AutocompleteInputProps) {
+  const { t } = useTranslation();
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -284,19 +286,19 @@ export function AutocompleteInput({
                     {suggestion.name}
                     {suggestion.isInList && (
                       <span className="ml-2 text-xs text-muted-foreground">
-                        (ALREADY IN LIST)
+                        {t("groceries:autocomplete.alreadyInList")}
                       </span>
                     )}
                   </p>
                   <p className="text-xs font-bold text-muted-foreground">
                     {suggestion.source === "personal" && (
-                      <span>★ YOU BOUGHT THIS {suggestion.usageCount}X</span>
+                      <span>{t("groceries:autocomplete.personal", { count: suggestion.usageCount })}</span>
                     )}
-                    {suggestion.source === "global" && <span>POPULAR</span>}
+                    {suggestion.source === "global" && <span>{t("groceries:autocomplete.popular")}</span>}
                   </p>
                 </div>
                 <span className="text-xs font-black border-2 border-current px-2 py-1 uppercase flex-shrink-0">
-                  {suggestion.category}
+                  {t(`groceries:form.categories.${suggestion.category}`)}
                 </span>
               </div>
             </button>

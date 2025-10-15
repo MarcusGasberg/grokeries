@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvitationsRouteImport } from './routes/invitations'
 import { Route as LayoutRouteRouteImport } from './routes/_layout/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LayoutSettingsIndexRouteImport } from './routes/_layout/settings/index'
 import { Route as LayoutGroceriesIndexRouteImport } from './routes/_layout/groceries/index'
 import { Route as LayoutGroceriesShoppingIndexRouteImport } from './routes/_layout/groceries/shopping/index'
 import { ServerRoute as ApiZeroMutateServerRouteImport } from './routes/api/zero/mutate'
@@ -49,6 +50,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LayoutSettingsIndexRoute = LayoutSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => LayoutRouteRoute,
 } as any)
 const LayoutGroceriesIndexRoute = LayoutGroceriesIndexRouteImport.update({
   id: '/groceries/',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/groceries': typeof LayoutGroceriesIndexRoute
+  '/settings': typeof LayoutSettingsIndexRoute
   '/groceries/shopping': typeof LayoutGroceriesShoppingIndexRoute
 }
 export interface FileRoutesByTo {
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/groceries': typeof LayoutGroceriesIndexRoute
+  '/settings': typeof LayoutSettingsIndexRoute
   '/groceries/shopping': typeof LayoutGroceriesShoppingIndexRoute
 }
 export interface FileRoutesById {
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_layout/groceries/': typeof LayoutGroceriesIndexRoute
+  '/_layout/settings/': typeof LayoutSettingsIndexRoute
   '/_layout/groceries/shopping/': typeof LayoutGroceriesShoppingIndexRoute
 }
 export interface FileRouteTypes {
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/groceries'
+    | '/settings'
     | '/groceries/shopping'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/groceries'
+    | '/settings'
     | '/groceries/shopping'
   id:
     | '__root__'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_layout/groceries/'
+    | '/_layout/settings/'
     | '/_layout/groceries/shopping/'
   fileRoutesById: FileRoutesById
 }
@@ -240,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_layout/settings/': {
+      id: '/_layout/settings/'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof LayoutSettingsIndexRouteImport
+      parentRoute: typeof LayoutRouteRoute
+    }
     '/_layout/groceries/': {
       id: '/_layout/groceries/'
       path: '/groceries'
@@ -298,11 +317,13 @@ declare module '@tanstack/react-start/server' {
 
 interface LayoutRouteRouteChildren {
   LayoutGroceriesIndexRoute: typeof LayoutGroceriesIndexRoute
+  LayoutSettingsIndexRoute: typeof LayoutSettingsIndexRoute
   LayoutGroceriesShoppingIndexRoute: typeof LayoutGroceriesShoppingIndexRoute
 }
 
 const LayoutRouteRouteChildren: LayoutRouteRouteChildren = {
   LayoutGroceriesIndexRoute: LayoutGroceriesIndexRoute,
+  LayoutSettingsIndexRoute: LayoutSettingsIndexRoute,
   LayoutGroceriesShoppingIndexRoute: LayoutGroceriesShoppingIndexRoute,
 }
 

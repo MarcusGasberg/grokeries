@@ -1,0 +1,52 @@
+{
+  "list": {
+    "empty": "EMPTY LIST",
+    "emptyDescription": "ADD ITEMS TO DOMINATE",
+    "progress": "PROGRESS",
+    "completed": "{{completed}}/{{total}}"
+  },
+  "form": {
+    "placeholder": "ADD ITEM...",
+    "quantity": "QTY",
+    "addButton": "DESTROY HUNGER",
+    "categories": {
+      "produce": "🥬 Produce",
+      "dairy": "🥛 Dairy",
+      "meat": "🥩 Meat",
+      "pantry": "🥫 pantry",
+      "bakery": "🍞 Bakery",
+      "frozen": "🧊 Frozen",
+      "beverages": "🍹 Beverages",
+      "household": "🧼 Household",
+      "other": "📦 Other"
+    }
+  },
+  "autocomplete": {
+    "personal": "★ YOU BOUGHT THIS {{count}}X",
+    "popular": "POPULAR",
+    "alreadyInList": "(ALREADY IN LIST)",
+    "noResults": "NO SUGGESTIONS",
+    "loading": "LOADING..."
+  },
+  "shopping": {
+    "startButton": "START SHOPPING",
+    "finishButton": "FINISH SHOPPING",
+    "exitButton": "EXIT SHOPPING MODE",
+    "completed": "SHOPPING COMPLETE!",
+    "achievement": "GROCERY DOMINATION ACHIEVED"
+  },
+  "menu": {
+    "createList": "CREATE LIST",
+    "inviteUser": "INVITE USER",
+    "collaborators": "COLLABORATORS",
+    "shareList": "SHARE LIST",
+    "settings": "SETTINGS",
+    "deleteList": "DELETE LIST",
+    "logout": "LOGOUT"
+  },
+  "mission": {
+    "complete": "MISSION COMPLETE!",
+    "achievement": "GROCERY DOMINATION ACHIEVED",
+    "completeButton": "COMPLETE MISSION"
+  }
+}

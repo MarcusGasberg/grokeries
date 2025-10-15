@@ -49,8 +49,9 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
   };
 
   const handleSettings = () => {
-    // Add settings logic here
-    console.log("Opening settings...");
+    router.navigate({
+      to: "/settings",
+    });
   };
 
   const handleShare = () => {

@@ -39,6 +39,7 @@ import {
 import { z } from "zod";
 import { toast } from "@/components/ui/use-toast";
 import { checkDuplicate } from "@/lib/autocomplete";
+import { useTranslation } from "react-i18next";
 
 const groceriesSearchSchema = z.object({
   listId: z.string().optional(),
@@ -115,6 +116,7 @@ const categories: Category[] = [
 ] as const;
 
 function RouteComponent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { zero, session } = router.options.context;
   const user = session?.data;
@@ -360,10 +362,10 @@ function RouteComponent() {
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight uppercase truncate">
-                  {user?.name ?? ""}' GROKERIES
+                  {user?.name ?? ""}' {t("app.name")}
                 </h1>
                 <p className="text-xs md:text-sm font-bold font-serif uppercase tracking-wide">
-                  EFFICIENT SHOPPING
+                  {t("app.tagline")}
                 </p>
               </div>
             </div>
@@ -405,10 +407,10 @@ function RouteComponent() {
               <div className="mt-6 p-4 bg-accent text-accent-foreground border-4 border-accent shadow-[4px_4px_0px_0px_var(--primary)]">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-black font-sans uppercase tracking-wide">
-                    PROGRESS
+                    {t("groceries:list.progress")}
                   </span>
                   <span className="text-lg font-black font-mono">
-                    {completedCount}/{totalCount}
+                    {t("groceries:list.completed", { completed: completedCount, total: totalCount })}
                   </span>
                 </div>
                 <div className="w-full bg-accent-foreground h-3 border-2 border-primary">
@@ -432,7 +434,7 @@ function RouteComponent() {
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   <ShoppingCart className="w-6 h-6" />
-                  START SHOPPING
+                  {t("groceries:shopping.startButton")}
                 </span>
                 <div className="absolute inset-0 border-4 border-green-400 opacity-0 group-hover:opacity-100 group-hover:animate-pulse" />
               </Button>
@@ -448,7 +450,7 @@ function RouteComponent() {
               }}
               className="mt-6 w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-black font-sans uppercase tracking-wide text-sm border-2 border-destructive shadow-[4px_4px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] transition-all"
             >
-              COMPLETE MISSION
+              {t("groceries:mission.completeButton")}
             </Button>
           )
         ) : (
@@ -474,7 +476,7 @@ function RouteComponent() {
                           value={field.value}
                           onChange={field.onChange}
                           onSelect={handleSuggestionSelect}
-                          placeholder="ADD ITEM..."
+                          placeholder={t("groceries:form.placeholder")}
                           className="flex-1 border-2 border-border font-serif font-bold uppercase placeholder:text-muted-foreground text-sm"
                           zero={zero}
                           userId={user?.userID ?? ""}
@@ -491,7 +493,7 @@ function RouteComponent() {
                     <FormItem>
                       <FormControl>
                         <Input
-                          placeholder="QTY"
+                          placeholder={t("groceries:form.quantity")}
                           {...field}
                           className="w-20 border-2 border-border font-serif font-bold uppercase placeholder:text-muted-foreground text-sm"
                         />
@@ -519,7 +521,7 @@ function RouteComponent() {
                         : "border-border hover:shadow-[2px_2px_0px_0px_var(--ring)]"
                     }`}
                   >
-                    {category.name}
+                    {t(`groceries:form.categories.${category.value}`)}
                   </Button>
                 ))}
               </div>
@@ -530,7 +532,7 @@ function RouteComponent() {
                 disabled={!form.formState.isValid}
               >
                 <Plus className="w-5 h-5 mr-2" />
-                DESTROY HUNGER
+                {t("groceries:form.addButton")}
               </Button>
             </form>
           </Form>
@@ -543,10 +545,10 @@ function RouteComponent() {
             <CardContent className="p-8 text-center">
               <Zap className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <p className="font-black font-sans uppercase text-lg text-muted-foreground">
-                EMPTY LIST
+                {t("groceries:list.empty")}
               </p>
               <p className="text-sm font-bold font-serif uppercase text-muted-foreground/70 mt-1">
-                ADD ITEMS TO DOMINATE
+                {t("groceries:list.emptyDescription")}
               </p>
             </CardContent>
           </Card>
@@ -624,10 +626,10 @@ function RouteComponent() {
           <CardContent className="p-6 text-center">
             <CheckCircle2 className="w-12 h-12 text-accent-foreground mx-auto mb-3" />
             <p className="font-black font-sans text-xl uppercase tracking-wide">
-              MISSION COMPLETE!
+              {t("groceries:mission.complete")}
             </p>
             <p className="text-sm font-bold font-serif uppercase mt-1">
-              GROCERY DOMINATION ACHIEVED
+              {t("groceries:mission.achievement")}
             </p>
           </CardContent>
         </Card>

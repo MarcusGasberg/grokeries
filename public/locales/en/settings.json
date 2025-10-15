@@ -1,0 +1,17 @@
+{
+  "title": "SETTINGS",
+  "subtitle": "CONFIGURE YOUR EXPERIENCE",
+  "back": "BACK",
+  "language": {
+    "title": "LANGUAGE",
+    "description": "Choose your preferred language for the app interface",
+    "active": "ACTIVE"
+  },
+  "userInfo": {
+    "title": "USER INFORMATION",
+    "name": "Name",
+    "email": "Email",
+    "unknown": "Unknown",
+    "notAvailable": "Not available"
+  }
+}

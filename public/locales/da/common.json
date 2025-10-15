@@ -1,0 +1,19 @@
+{
+  "app": {
+    "name": "GROKERIES",
+    "tagline": "EFFEKTIV INDKØB"
+  },
+  "nav": {
+    "groceries": "INDKØBSLISTE",
+    "shopping": "INDKØB",
+    "settings": "INDSTILLINGER"
+  },
+  "actions": {
+    "add": "TILFØJ",
+    "delete": "SLET",
+    "edit": "REDIGER",
+    "save": "GEM",
+    "cancel": "ANNULLER",
+    "confirm": "BEKRÆFT"
+  }
+}

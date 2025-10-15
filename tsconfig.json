@@ -2,7 +2,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "public/script*.js"
+    "public/script*.js",
+    "src/@types/**/*.d.ts"
   ],
   "compilerOptions": {
     "strict": true,

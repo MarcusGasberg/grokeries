@@ -1,0 +1,17 @@
+{
+  "title": "INDSTILLINGER",
+  "subtitle": "KONFIGURER DIN OPLEVELSE",
+  "back": "TILBAGE",
+  "language": {
+    "title": "SPROG",
+    "description": "Vælg dit foretrukne sprog til app-grænsefladen",
+    "active": "AKTIV"
+  },
+  "userInfo": {
+    "title": "BRUGERINFORMATION",
+    "name": "Navn",
+    "email": "Email",
+    "unknown": "Ukendt",
+    "notAvailable": "Ikke tilgængelig"
+  }
+}

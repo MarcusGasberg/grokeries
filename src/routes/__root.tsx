@@ -12,6 +12,7 @@ import * as React from "react";
 import { RouterContext } from "@/router";
 import { must } from "@/shared/must";
 import { Toaster } from "@/components/ui/toaster";
+import "@/lib/i18n";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({

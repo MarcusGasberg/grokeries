@@ -1,0 +1,52 @@
+{
+  "list": {
+    "empty": "TOM LISTE",
+    "emptyDescription": "TILFØJ VARER FOR AT DOMINERE",
+    "progress": "FREMSKRIDT",
+    "completed": "{{completed}}/{{total}}"
+  },
+  "form": {
+    "placeholder": "TILFØJ VARE...",
+    "quantity": "ANTAL",
+    "addButton": "TILINTETGØR SULT",
+    "categories": {
+      "produce": "🥬 Grøntsager",
+      "dairy": "🥛 Mejeriprodukter",
+      "meat": "🥩 Kød",
+      "pantry": "🥫 Forråd",
+      "bakery": "🍞 Bagværk",
+      "frozen": "🧊 Frosne varer",
+      "beverages": "🍹 Drikkevarer",
+      "household": "🧼 Husholdning",
+      "other": "📦 Andet"
+    }
+  },
+  "autocomplete": {
+    "personal": "★ DU KØBTE DETTE {{count}}X",
+    "popular": "POPULÆR",
+    "alreadyInList": "(ALLEREDE PÅ LISTEN)",
+    "noResults": "INGEN FORSLAG",
+    "loading": "INDLÆSER..."
+  },
+  "shopping": {
+    "startButton": "START INDKØB",
+    "finishButton": "AFSLUT INDKØB",
+    "exitButton": "FORLAD INDKØBSTILSTAND",
+    "completed": "INDKØB FULDFØRT!",
+    "achievement": "INDKØBSDOMINANS OPNÅET"
+  },
+  "menu": {
+    "createList": "OPRET LISTE",
+    "inviteUser": "INVITER BRUGER",
+    "collaborators": "SAMARBEJDSPARTNERE",
+    "shareList": "DEL LISTE",
+    "settings": "INDSTILLINGER",
+    "deleteList": "SLET LISTE",
+    "logout": "LOG UD"
+  },
+  "mission": {
+    "complete": "MISSION FULDFØRT!",
+    "achievement": "INDKØBSDOMINANS OPNÅET",
+    "completeButton": "FULDFØR MISSION"
+  }
+}
