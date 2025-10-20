@@ -20,6 +20,7 @@ type InvitationStatus = "loading" | "success" | "error" | "expired" | "already_m
 
 export const Route = createFileRoute("/invitations")({
   component: InvitationsPage,
+  ssr: false,
   beforeLoad: async () => {
     // Check if user is logged in
     const { data: session } = await authClient.getSession();

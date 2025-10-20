@@ -6,16 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import {
-  Trash2,
-  Plus,
-  ShoppingCart,
-  CheckCircle2,
-  Zap,
-  ListPlus,
-} from "lucide-react";
+import { Trash2, Plus, ShoppingCart, CheckCircle2, Zap } from "lucide-react";
 import { useQuery } from "@rocicorp/zero/react";
-import { Schema } from "@/zero/zero-schema";
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
 import { groceryFormSchema, GroceryFormValue } from "@/shared/grocery.form";
@@ -50,15 +42,6 @@ export const Route = createFileRoute("/_layout/groceries/")({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => {
     return groceriesSearchSchema.parse(search);
-  },
-  beforeLoad: async () => {
-    const { data: session, error } = await authClient.getSession();
-    if (!session?.session) {
-      throw redirect({
-        to: "/login",
-        search: { redirect: "/groceries" }, // optional: send them back after login
-      });
-    }
   },
 });
 
@@ -117,7 +100,7 @@ const categories: Category[] = [
 ] as const;
 
 function RouteComponent() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation("groceries");
   const router = useRouter();
   const { zero, session } = router.options.context;
   const user = session?.data;
@@ -253,8 +236,13 @@ function RouteComponent() {
   const selectedCategory = form.watch("category");
 
   const handleSuggestionSelect = (suggestion: AutocompleteSuggestion) => {
-    form.setValue("name", suggestion.name, { shouldDirty: true, shouldValidate: true });
-    form.setValue("category", suggestion.category as GroceryCategory, { shouldDirty: true });
+    form.setValue("name", suggestion.name, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("category", suggestion.category as GroceryCategory, {
+      shouldDirty: true,
+    });
   };
 
   const addItem = async (data: GroceryFormValue) => {
@@ -282,30 +270,49 @@ function RouteComponent() {
     });
 
     // Track in user history for future autocomplete learning
+    const language = getNormalizedLanguage(i18n.language);
+    const nameNormalized = data.name.toLowerCase().trim();
+
+    console.log("=== Adding item to history ===");
+    console.log("Item name:", data.name);
+    console.log("Normalized:", nameNormalized);
+    console.log("Category:", data.category);
+    console.log("Language:", language);
+    console.log("UserID:", user?.userID);
+
     const historyQuery = zero.query.userGroceryHistory
       .where("userId", "=", user?.userID ?? "")
-      .where("nameNormalized", "=", data.name.toLowerCase().trim());
+      .where("nameNormalized", "=", nameNormalized)
+      .where("language", "=", language);
 
     const [existingHistory] = await historyQuery.run();
 
-    if (existingHistory && existingHistory.length > 0) {
-      // Update existing history entry
-      const history = existingHistory[0];
-      zero.mutate.userGroceryHistory.update({
-        id: history.id,
-        usageCount: history.usageCount + 1,
+    if (existingHistory) {
+      console.log("Updating history:", {
+        id: existingHistory.id,
+        oldUsageCount: existingHistory.usageCount,
+        newUsageCount: (existingHistory.usageCount ?? 0) + 1,
+        oldCategory: existingHistory.category,
+        newCategory: data.category,
+      });
+
+      await zero.mutate.userGroceryHistory.update({
+        id: existingHistory.id,
+        usageCount: (existingHistory.usageCount ?? 0) + 1,
         lastUsedAt: Date.now(),
         category: data.category, // Update category in case it changed
       });
+
+      console.log("Update mutation executed");
     } else {
       // Create new history entry with current language (with fallback to 'en')
-      const language = getNormalizedLanguage(i18n.language);
+      console.log("Creating new history entry");
 
-      zero.mutate.userGroceryHistory.insert({
+      await zero.mutate.userGroceryHistory.insert({
         id: nanoid(),
         userId: user?.userID ?? "",
         name: data.name,
-        nameNormalized: data.name.toLowerCase().trim(),
+        nameNormalized: nameNormalized,
         category: data.category,
         language,
         usageCount: 1,
@@ -313,6 +320,8 @@ function RouteComponent() {
         createdAt: Date.now(),
         globalItemId: null, // We could match this to a global item if desired
       });
+
+      console.log("Insert mutation executed");
     }
 
     form.resetField("name");
@@ -365,10 +374,15 @@ function RouteComponent() {
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight uppercase truncate">
-                  {user?.name ?? ""}' {t("app.name")}
+                  {user?.name ?? ""}'{" "}
+                  {t("app.name", {
+                    ns: "common",
+                  })}
                 </h1>
                 <p className="text-xs md:text-sm font-bold font-serif uppercase tracking-wide">
-                  {t("app.tagline")}
+                  {t("app.tagline", {
+                    ns: "common",
+                  })}
                 </p>
               </div>
             </div>
@@ -410,10 +424,16 @@ function RouteComponent() {
               <div className="mt-6 p-4 bg-accent text-accent-foreground border-4 border-accent shadow-[4px_4px_0px_0px_var(--primary)]">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-black font-sans uppercase tracking-wide">
-                    {t("groceries:list.progress")}
+                    {t("list.progress", {
+                      ns: "groceries",
+                    })}
                   </span>
                   <span className="text-lg font-black font-mono">
-                    {t("groceries:list.completed", { completed: completedCount, total: totalCount })}
+                    {t("list.completed", {
+                      completed: completedCount,
+                      total: totalCount,
+                      ns: "groceries",
+                    })}
                   </span>
                 </div>
                 <div className="w-full bg-accent-foreground h-3 border-2 border-primary">
@@ -437,7 +457,9 @@ function RouteComponent() {
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   <ShoppingCart className="w-6 h-6" />
-                  {t("groceries:shopping.startButton")}
+                  {t("shopping.startButton", {
+                    ns: "groceries",
+                  })}
                 </span>
                 <div className="absolute inset-0 border-4 border-green-400 opacity-0 group-hover:opacity-100 group-hover:animate-pulse" />
               </Button>
@@ -453,7 +475,9 @@ function RouteComponent() {
               }}
               className="mt-6 w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-black font-sans uppercase tracking-wide text-sm border-2 border-destructive shadow-[4px_4px_0px_0px_var(--ring)] hover:shadow-[2px_2px_0px_0px_var(--ring)] transition-all"
             >
-              {t("groceries:mission.completeButton")}
+              {t("mission.completeButton", {
+                ns: "groceries",
+              })}
             </Button>
           )
         ) : (
@@ -479,7 +503,9 @@ function RouteComponent() {
                           value={field.value}
                           onChange={field.onChange}
                           onSelect={handleSuggestionSelect}
-                          placeholder={t("groceries:form.placeholder")}
+                          placeholder={t("form.placeholder", {
+                            ns: "groceries",
+                          })}
                           className="flex-1 border-2 border-border font-serif font-bold uppercase placeholder:text-muted-foreground text-sm"
                           zero={zero}
                           userId={user?.userID ?? ""}
@@ -496,7 +522,9 @@ function RouteComponent() {
                     <FormItem>
                       <FormControl>
                         <Input
-                          placeholder={t("groceries:form.quantity")}
+                          placeholder={t("form.quantity", {
+                            ns: "groceries",
+                          })}
                           {...field}
                           className="w-20 border-2 border-border font-serif font-bold uppercase placeholder:text-muted-foreground text-sm"
                         />
@@ -524,7 +552,7 @@ function RouteComponent() {
                         : "border-border hover:shadow-[2px_2px_0px_0px_var(--ring)]"
                     }`}
                   >
-                    {t(`groceries:form.categories.${category.value}`)}
+                    {t(`form.categories.${category.value}`)}
                   </Button>
                 ))}
               </div>
@@ -535,7 +563,7 @@ function RouteComponent() {
                 disabled={!form.formState.isValid}
               >
                 <Plus className="w-5 h-5 mr-2" />
-                {t("groceries:form.addButton")}
+                {t("form.addButton")}
               </Button>
             </form>
           </Form>
@@ -548,10 +576,10 @@ function RouteComponent() {
             <CardContent className="p-8 text-center">
               <Zap className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <p className="font-black font-sans uppercase text-lg text-muted-foreground">
-                {t("groceries:list.empty")}
+                {t("list.empty")}
               </p>
               <p className="text-sm font-bold font-serif uppercase text-muted-foreground/70 mt-1">
-                {t("groceries:list.emptyDescription")}
+                {t("list.emptyDescription")}
               </p>
             </CardContent>
           </Card>
@@ -568,7 +596,7 @@ function RouteComponent() {
                     : "bg-card border-primary hover:bg-card/90"
                 }`}
                 style={{
-                  "viewTransitionName": `item-${item.id}`,
+                  viewTransitionName: `item-${item.id}`,
                 }}
               >
                 <CardContent className="p-2">
@@ -596,7 +624,8 @@ function RouteComponent() {
                       <Badge
                         className={`text-[10px] font-black font-sans uppercase tracking-wide ${categoryInfo.color} flex-shrink-0`}
                       >
-                        {t(`groceries:form.categories.${item.category}`)}
+                        {item.category &&
+                          t(`form.categories.${item.category}` as const)}
                       </Badge>
                       {item.quantity && (
                         <span className="text-[10px] font-bold font-mono text-muted-foreground flex-shrink-0">
@@ -629,10 +658,10 @@ function RouteComponent() {
           <CardContent className="p-6 text-center">
             <CheckCircle2 className="w-12 h-12 text-accent-foreground mx-auto mb-3" />
             <p className="font-black font-sans text-xl uppercase tracking-wide">
-              {t("groceries:mission.complete")}
+              {t("mission.complete")}
             </p>
             <p className="text-sm font-bold font-serif uppercase mt-1">
-              {t("groceries:mission.achievement")}
+              {t("mission.achievement")}
             </p>
           </CardContent>
         </Card>

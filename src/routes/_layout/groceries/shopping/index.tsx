@@ -32,15 +32,6 @@ export const Route = createFileRoute("/_layout/groceries/shopping/")({
   validateSearch: (search: Record<string, unknown>) => {
     return shoppingSearchSchema.parse(search);
   },
-  beforeLoad: async () => {
-    const { data: session, error } = await authClient.getSession();
-    if (!session?.session) {
-      throw redirect({
-        to: "/login",
-        search: { redirect: "/groceries/shopping" },
-      });
-    }
-  },
 });
 
 interface Category {
@@ -470,7 +461,9 @@ function RouteComponent() {
                         </Badge>
                         {item.quantity && (
                           <span className="text-sm font-bold font-mono text-muted-foreground">
-                            {t("groceries:shopping.quantity", { quantity: item.quantity })}
+                            {t("groceries:shopping.quantity", {
+                              quantity: item.quantity,
+                            })}
                           </span>
                         )}
                       </div>
@@ -487,7 +480,9 @@ function RouteComponent() {
       {completedItems.length > 0 && (
         <div className="space-y-3 mt-8 pt-8 border-t-4 border-dashed border-muted-foreground">
           <p className="text-sm font-black font-sans uppercase tracking-wide text-muted-foreground mb-4">
-            {t("groceries:shopping.completedSection", { count: completedItems.length })}
+            {t("groceries:shopping.completedSection", {
+              count: completedItems.length,
+            })}
           </p>
           {filteredCompletedItems.map((item) => {
             const categoryInfo = getCategoryInfo(item.category);
@@ -561,7 +556,9 @@ function RouteComponent() {
               {t("groceries:shopping.exitConfirmTitle")}
             </DialogTitle>
             <DialogDescription className="text-base font-bold font-serif uppercase text-muted-foreground">
-              {t("groceries:shopping.exitConfirmDescription", { count: uncompletedItems.length })}
+              {t("groceries:shopping.exitConfirmDescription", {
+                count: uncompletedItems.length,
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">

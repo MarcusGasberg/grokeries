@@ -3,19 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Settings as SettingsIcon, Globe, ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_layout/settings/")({
   component: RouteComponent,
-  beforeLoad: async () => {
-    const { data: session, error } = await authClient.getSession();
-    if (!session?.session) {
-      throw redirect({
-        to: "/login",
-        search: { redirect: "/settings" },
-      });
-    }
-  },
 });
 
 const languages = [
@@ -24,7 +14,7 @@ const languages = [
 ];
 
 function RouteComponent() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation("settings");
   const router = useRouter();
   const { session } = router.options.context;
   const user = session?.data;
@@ -48,10 +38,10 @@ function RouteComponent() {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-black font-sans tracking-tight uppercase">
-                  {t("settings:title")}
+                  {t("title")}
                 </h1>
                 <p className="text-xs md:text-sm font-bold font-serif uppercase tracking-wide">
-                  {t("settings:subtitle")}
+                  {t("subtitle")}
                 </p>
               </div>
             </div>
@@ -65,12 +55,12 @@ function RouteComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 font-black font-sans uppercase text-xl">
               <Globe className="w-6 h-6" />
-              {t("settings:language.title")}
+              {t("language.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm font-bold font-serif text-muted-foreground mb-4">
-              {t("settings:language.description")}
+              {t("language.description")}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {languages.map((lang) => (
@@ -87,7 +77,9 @@ function RouteComponent() {
                   <div className="flex-1 text-left">
                     <div className="font-black">{lang.name}</div>
                     {i18n.language === lang.code && (
-                      <div className="text-xs font-bold opacity-80">{t("settings:language.active")}</div>
+                      <div className="text-xs font-bold opacity-80">
+                        {t("language.active")}
+                      </div>
                     )}
                   </div>
                   {i18n.language === lang.code && (
@@ -103,25 +95,25 @@ function RouteComponent() {
         <Card className="border-4 border-primary shadow-[6px_6px_0px_0px_var(--ring)]">
           <CardHeader>
             <CardTitle className="font-black font-sans uppercase text-xl">
-              {t("settings:userInfo.title")}
+              {t("userInfo.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-bold font-sans uppercase text-muted-foreground">
-                  {t("settings:userInfo.name")}
+                  {t("userInfo.name")}
                 </label>
                 <p className="font-black font-sans text-lg uppercase">
-                  {user?.name || t("settings:userInfo.unknown")}
+                  {user?.name || t("userInfo.unknown")}
                 </p>
               </div>
               <div>
                 <label className="text-xs font-bold font-sans uppercase text-muted-foreground">
-                  {t("settings:userInfo.email")}
+                  {t("userInfo.email")}
                 </label>
                 <p className="font-bold font-mono text-sm">
-                  {user?.email || t("settings:userInfo.notAvailable")}
+                  {user?.email || t("userInfo.notAvailable")}
                 </p>
               </div>
             </div>

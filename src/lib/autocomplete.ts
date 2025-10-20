@@ -1,10 +1,11 @@
+import { GroceryCategory } from "@/schema";
 import type { GlobalGroceryItem, UserGroceryHistory } from "@/zero/zero-schema";
 
 export interface AutocompleteSuggestion {
   id: string;
   name: string;
   nameNormalized: string;
-  category: string;
+  category: GroceryCategory;
   source: "personal" | "global";
   score: number;
   usageCount: number;

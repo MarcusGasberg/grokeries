@@ -10,6 +10,7 @@ import type { Zero } from "@rocicorp/zero";
 import type { Schema } from "@/zero/zero-schema";
 import { useTranslation } from "react-i18next";
 import { getNormalizedLanguage } from "@/lib/language-utils";
+import { Mutators } from "@/zero/mutators";
 
 interface AutocompleteInputProps {
   value: string;
@@ -17,7 +18,7 @@ interface AutocompleteInputProps {
   onSelect: (suggestion: AutocompleteSuggestion) => void;
   placeholder?: string;
   className?: string;
-  zero: Zero<Schema>;
+  zero: Zero<Schema, Mutators>;
   userId: string;
   existingItemNames: string[];
   disabled?: boolean;
@@ -36,7 +37,7 @@ export function AutocompleteInput({
   disabled,
   id,
 }: AutocompleteInputProps) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation("groceries");
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -117,7 +118,7 @@ export function AutocompleteInput({
           globalItemId: item.id,
         });
 
-        if (globalPopular.length >= (8 - personalItems.length)) break;
+        if (globalPopular.length >= 8 - personalItems.length) break;
       }
 
       return [...personalItems, ...globalPopular]
@@ -204,6 +205,9 @@ export function AutocompleteInput({
         e.preventDefault();
         setShowDropdown(false);
         setSelectedIndex(-1);
+        setIsInputFocused(false);
+        // Blur the input to ensure consistent state
+        inputRef.current?.blur();
         break;
     }
   };
@@ -253,10 +257,8 @@ export function AutocompleteInput({
           }
         }}
         onBlur={() => {
-          // Delay to allow click events on dropdown items to fire first
-          setTimeout(() => {
-            setIsInputFocused(false);
-          }, 200);
+          setIsInputFocused(false);
+          setShowDropdown(false);
         }}
         placeholder={placeholder}
         className={className}
@@ -291,19 +293,25 @@ export function AutocompleteInput({
                     {suggestion.name}
                     {suggestion.isInList && (
                       <span className="ml-2 text-xs text-muted-foreground">
-                        {t("groceries:autocomplete.alreadyInList")}
+                        {t("autocomplete.alreadyInList")}
                       </span>
                     )}
                   </p>
                   <p className="text-xs font-bold text-muted-foreground">
                     {suggestion.source === "personal" && (
-                      <span>{t("groceries:autocomplete.personal", { count: suggestion.usageCount })}</span>
+                      <span>
+                        {t("autocomplete.personal", {
+                          count: suggestion.usageCount,
+                        })}
+                      </span>
                     )}
-                    {suggestion.source === "global" && <span>{t("groceries:autocomplete.popular")}</span>}
+                    {suggestion.source === "global" && (
+                      <span>{t("autocomplete.popular")}</span>
+                    )}
                   </p>
                 </div>
                 <span className="text-xs font-black border-2 border-current px-2 py-1 uppercase flex-shrink-0">
-                  {t(`groceries:form.categories.${suggestion.category}`)}
+                  {t(`form.categories.${suggestion.category}` as const)}
                 </span>
               </div>
             </button>
