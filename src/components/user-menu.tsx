@@ -29,6 +29,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface UserMenuProps {
   onInviteClick: () => void;
@@ -38,6 +39,7 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, currentListId }: UserMenuProps) {
+  const { t } = useTranslation("common");
   const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -83,7 +85,7 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56 bg-background border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(31,41,55,1)] p-2"
+        className="w-64 bg-background border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(31,41,55,1)] p-2"
         align="end"
       >
         <DropdownMenuItem
@@ -91,7 +93,7 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
           className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-accent hover:bg-accent hover:text-background! hover:fill-accent focus:border-accent focus:bg-accent focus:text-background transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4 group-hover:text-foreground!" />
-          CREATE LIST
+          {t("userMenu.createList")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -99,7 +101,7 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
           className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-accent hover:bg-accent hover:text-background! hover:fill-accent focus:border-accent focus:bg-accent focus:text-background transition-all cursor-pointer"
         >
           <UserPlus className="w-4 h-4 group-hover:text-foreground!" />
-          INVITE USER
+          {t("userMenu.inviteUser")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -107,7 +109,7 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
           className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-accent hover:bg-accent hover:text-background! focus:border-accent focus:bg-accent focus:text-background transition-all cursor-pointer"
         >
           <Users className="w-4 h-4 group-hover:text-foreground!" />
-          COLLABORATORS
+          {t("userMenu.collaborators")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -115,7 +117,7 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
           className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-accent hover:bg-accent hover:text-background! focus:border-accent focus:bg-accent focus:text-background transition-all cursor-pointer"
         >
           <Share2 className="w-4 h-4 group-hover:text-foreground!" />
-          SHARE LIST
+          {t("userMenu.shareList")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -123,7 +125,7 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
           className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-accent hover:bg-accent hover:text-background! focus:border-accent focus:bg-accent focus:text-background transition-all cursor-pointer"
         >
           <Settings className="w-4 h-4 group-hover:text-foreground!" />
-          SETTINGS
+          {t("userMenu.settings")}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator className="border-t-2 border-foreground my-2" />
@@ -134,7 +136,7 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
             className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-red-500 hover:bg-red-500 hover:text-white! focus:border-red-500 focus:bg-red-500 focus:text-white transition-all cursor-pointer"
           >
             <Trash2 className="w-4 h-4 group-hover:text-white!" />
-            DELETE LIST
+            {t("userMenu.deleteList")}
           </DropdownMenuItem>
         )}
 
@@ -143,7 +145,7 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
           className="flex items-center gap-3 p-3 font-black font-sans uppercase text-sm text-foreground border-2 border-transparent hover:border-red-500 hover:bg-red-500 hover:text-white! focus:border-red-500 focus:bg-red-500 focus:text-white transition-all cursor-pointer"
         >
           <LogOut className="w-4 h-4 group-hover:text-white!" />
-          LOGOUT
+          {t("userMenu.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
 
@@ -151,21 +153,21 @@ export function UserMenu({ onInviteClick, onCreateListClick, onDeleteList, curre
         <AlertDialogContent className="bg-background border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(31,41,55,1)]">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-black font-sans uppercase text-xl text-foreground">
-              DELETE GROCERY LIST?
+              {t("userMenu.deleteDialog.title")}
             </AlertDialogTitle>
             <AlertDialogDescription className="font-bold font-serif text-sm text-muted-foreground">
-              This will permanently delete this grocery list, all its items, collaborators, and invitations. This action cannot be undone.
+              {t("userMenu.deleteDialog.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="font-black font-sans uppercase text-xs border-2 border-foreground shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] hover:shadow-[1px_1px_0px_0px_rgba(31,41,55,1)]">
-              CANCEL
+              {t("userMenu.deleteDialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteList}
               className="font-black font-sans uppercase text-xs bg-red-500 hover:bg-red-600 text-white border-2 border-red-700 shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] hover:shadow-[1px_1px_0px_0px_rgba(31,41,55,1)]"
             >
-              DELETE
+              {t("userMenu.deleteDialog.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -15,6 +15,7 @@
     "generate": "sst dev -- drizzle-zero generate --format --output=src/zero/zero-schema.gen.ts",
     "create-migration": "sst dev -- drizzle-kit generate",
     "seed-global-items": "sst dev -- bun run scripts/seed-global-items.ts",
+    "import-openfoodfacts": "sst dev -- bun run scripts/import-openfoodfacts.ts",
     "test": "vitest",
     "test:ui": "vitest --ui"
   },
@@ -74,6 +75,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "jsdom": "^27.0.0",
+    "playwright": "^1.56.1",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.7.2",
     "vite": "^7.0.4",

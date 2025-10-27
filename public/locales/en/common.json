@@ -15,5 +15,53 @@
     "save": "SAVE",
     "cancel": "CANCEL",
     "confirm": "CONFIRM"
+  },
+  "userMenu": {
+    "createList": "CREATE LIST",
+    "inviteUser": "INVITE USER",
+    "collaborators": "COLLABORATORS",
+    "shareList": "SHARE LIST",
+    "settings": "SETTINGS",
+    "deleteList": "DELETE LIST",
+    "logout": "LOGOUT",
+    "deleteDialog": {
+      "title": "DELETE GROCERY LIST?",
+      "description": "This will permanently delete this grocery list, all its items, collaborators, and invitations. This action cannot be undone.",
+      "cancel": "CANCEL",
+      "delete": "DELETE"
+    }
+  },
+  "inviteDialog": {
+    "title": "INVITE COLLABORATOR",
+    "subtitle": "SHARE YOUR GROCERY DESTRUCTION",
+    "emailLabel": "EMAIL ADDRESS",
+    "emailPlaceholder": "ENTER THEIR EMAIL...",
+    "messageLabel": "PERSONAL MESSAGE (OPTIONAL)",
+    "messagePlaceholder": "JOIN MY GROCERY MISSION...",
+    "sendInvite": "SEND INVITE",
+    "sending": "SENDING...",
+    "cancel": "CANCEL",
+    "success": "Invitation sent successfully!",
+    "error": "Failed to send invitation. Please try again.",
+    "noListSelected": "No list selected. Please select a list first.",
+    "alreadyMember": "This user is already a member of this list",
+    "pendingInvitation": "An invitation has already been sent to this email",
+    "validation": {
+      "invalidEmail": "Invalid email address"
+    }
+  },
+  "createListDialog": {
+    "title": "CREATE NEW LIST",
+    "subtitle": "START YOUR GROCERY DOMINATION",
+    "nameLabel": "LIST NAME",
+    "namePlaceholder": "ENTER LIST NAME...",
+    "createList": "CREATE LIST",
+    "creating": "CREATING...",
+    "cancel": "CANCEL",
+    "success": "Grocery list created successfully!",
+    "error": "Failed to create grocery list. Please try again.",
+    "validation": {
+      "nameRequired": "List name is required"
+    }
   }
 }

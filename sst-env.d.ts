@@ -8,14 +8,6 @@ declare module "sst" {
     "MyVPC": {
       "type": "sst.aws.Vpc"
     }
-    "Postgres": {
-      "database": string
-      "host": string
-      "password": string
-      "port": number
-      "type": "sst.aws.Postgres"
-      "username": string
-    }
     "ResendApiKey": {
       "type": "sst.sst.Secret"
       "value": string
@@ -27,16 +19,6 @@ declare module "sst" {
     "replication-bucket": {
       "name": string
       "type": "sst.aws.Bucket"
-    }
-    "replication-manager": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
-    }
-    "view-syncer": {
-      "service": string
-      "type": "sst.aws.Service"
-      "url": string
     }
   }
 }

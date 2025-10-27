@@ -6,6 +6,7 @@ export default $config({
       name: "grokeries",
       removal: input?.stage === "production" ? "retain" : "remove",
       home: "aws",
+      region: process.env.AWS_REGION || "eu-central-1",
       providers: {
         aws: {
           profile:

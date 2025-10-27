@@ -52,6 +52,7 @@ export function AutocompleteInput({
   // Query global grocery items filtered by current language
   const globalItemsQuery = zero.query.globalGroceryItems
     .where("language", "=", currentLanguage)
+    .where("nameNormalized", "!=", "")
     .orderBy("popularity", "desc");
 
   const [globalItems] = useQuery(globalItemsQuery);
@@ -60,6 +61,7 @@ export function AutocompleteInput({
   const userHistoryQuery = zero.query.userGroceryHistory
     .where("userId", "=", userId)
     .where("language", "=", currentLanguage)
+    .where("nameNormalized", "!=", "")
     .orderBy("lastUsedAt", "desc");
 
   const [userHistory] = useQuery(userHistoryQuery);

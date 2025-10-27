@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +20,9 @@ import { nanoid } from "nanoid";
 // ------------------
 // Schema
 // ------------------
-const createListSchema = z.object({
-  name: z.string().min(1, { message: "List name is required" }),
-});
-
-type CreateListFormValues = z.infer<typeof createListSchema>;
+type CreateListFormValues = {
+  name: string;
+};
 
 // ------------------
 // Component
@@ -37,7 +36,13 @@ export function CreateListDialog({
   onClose: () => void;
   onSuccess?: (listId: string) => void;
 }) {
+  const { t } = useTranslation("common");
   const { zero } = useRouter().options.context;
+
+  // Create schema with i18n messages
+  const createListSchema = z.object({
+    name: z.string().min(1, { message: t("createListDialog.validation.nameRequired") }),
+  });
 
   const {
     register,
@@ -61,14 +66,14 @@ export function CreateListDialog({
     try {
       zero.mutate.groceryList.add({ id: listId, name: values.name });
       toast({
-        title: "Grocery list created successfully!",
+        title: t("createListDialog.success"),
         duration: 60_0000,
       });
     } catch (error) {
       console.error("Error creating grocery list:", error);
       toast({
         variant: "destructive",
-        title: "Failed to create grocery list. Please try again.",
+        title: t("createListDialog.error"),
       });
     }
   };
@@ -85,10 +90,10 @@ export function CreateListDialog({
       <DialogContent className="bg-background border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(249,115,22,1)] max-w-md">
         <DialogHeader className="border-b-4 border-foreground pb-4 mb-6">
           <DialogTitle className="text-2xl font-black font-sans uppercase tracking-tight text-foreground">
-            CREATE NEW LIST
+            {t("createListDialog.title")}
           </DialogTitle>
           <p className="text-sm font-bold font-serif uppercase tracking-wide text-muted-foreground mt-2">
-            START YOUR GROCERY DOMINATION
+            {t("createListDialog.subtitle")}
           </p>
         </DialogHeader>
 
@@ -99,12 +104,12 @@ export function CreateListDialog({
               htmlFor="name"
               className="text-sm font-black font-sans uppercase tracking-wide text-foreground"
             >
-              LIST NAME
+              {t("createListDialog.nameLabel")}
             </Label>
             <Input
               id="name"
               type="text"
-              placeholder="ENTER LIST NAME..."
+              placeholder={t("createListDialog.namePlaceholder")}
               {...register("name")}
               className="border-4 border-foreground bg-background text-foreground placeholder:text-muted-foreground font-bold font-sans uppercase text-sm shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] focus:shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] transition-all"
             />
@@ -123,7 +128,7 @@ export function CreateListDialog({
               className="flex-1 bg-accent text-accent-foreground border-4 border-accent-foreground hover:bg-accent-foreground hover:text-accent font-black font-sans uppercase text-sm shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] hover:shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-4 h-4 mr-2" />
-              {isSubmitting ? "CREATING..." : "CREATE LIST"}
+              {isSubmitting ? t("createListDialog.creating") : t("createListDialog.createList")}
             </Button>
             <Button
               type="button"

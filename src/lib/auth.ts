@@ -5,6 +5,7 @@ import { createAuthMiddleware, jwt } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { must } from "@/shared/must";
 import cookie from "cookie";
+import { sendVerificationEmail } from "./email";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -12,6 +13,39 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: process.env.NODE_ENV === "production", // Only require in production
+    sendResetPassword: async ({ user, url }) => {
+      // Send password reset email
+      if (process.env.RESEND_API_KEY) {
+        await sendVerificationEmail({
+          to: user.email,
+          type: "reset-password",
+          verificationUrl: url,
+          userName: user.name,
+        });
+      } else {
+        // In dev mode without Resend, log the URL
+        console.log(`\n🔐 PASSWORD RESET LINK:\n${url}\n`);
+      }
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      // Send verification email when user signs up
+      if (process.env.RESEND_API_KEY) {
+        await sendVerificationEmail({
+          to: user.email,
+          type: "verify-email",
+          verificationUrl: url,
+          userName: user.name,
+        });
+      } else {
+        // In dev mode without Resend, log the URL
+        console.log(`\n✉️  EMAIL VERIFICATION LINK FOR ${user.email}:\n${url}\n`);
+      }
+    },
+    sendOnSignUp: true, // Automatically send verification email on sign up
+    autoSignInAfterVerification: true, // Auto sign in after verifying email
   },
   plugins: [
     jwt({

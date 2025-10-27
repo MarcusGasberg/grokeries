@@ -15,5 +15,53 @@
     "save": "GEM",
     "cancel": "ANNULLER",
     "confirm": "BEKRÆFT"
+  },
+  "userMenu": {
+    "createList": "OPRET LISTE",
+    "inviteUser": "INVITER BRUGER",
+    "collaborators": "SAMARBEJDSPARTNERE",
+    "shareList": "DEL LISTE",
+    "settings": "INDSTILLINGER",
+    "deleteList": "SLET LISTE",
+    "logout": "LOG UD",
+    "deleteDialog": {
+      "title": "SLET INDKØBSLISTE?",
+      "description": "Dette vil permanent slette denne indkøbsliste, alle dens varer, samarbejdspartnere og invitationer. Denne handling kan ikke fortrydes.",
+      "cancel": "ANNULLER",
+      "delete": "SLET"
+    }
+  },
+  "inviteDialog": {
+    "title": "INVITER SAMARBEJDSPARTNER",
+    "subtitle": "DEL DIN INDKØBSØDELÆGGELSE",
+    "emailLabel": "EMAIL ADRESSE",
+    "emailPlaceholder": "INDTAST DERES EMAIL...",
+    "messageLabel": "PERSONLIG BESKED (VALGFRI)",
+    "messagePlaceholder": "DELTAG I MIN INDKØBSMISSION...",
+    "sendInvite": "SEND INVITATION",
+    "sending": "SENDER...",
+    "cancel": "ANNULLER",
+    "success": "Invitation sendt!",
+    "error": "Kunne ikke sende invitation. Prøv venligst igen.",
+    "noListSelected": "Ingen liste valgt. Vælg venligst en liste først.",
+    "alreadyMember": "Denne bruger er allerede medlem af denne liste",
+    "pendingInvitation": "En invitation er allerede sendt til denne email",
+    "validation": {
+      "invalidEmail": "Ugyldig email adresse"
+    }
+  },
+  "createListDialog": {
+    "title": "OPRET NY LISTE",
+    "subtitle": "START DIN INDKØBSDOMINANS",
+    "nameLabel": "LISTE NAVN",
+    "namePlaceholder": "INDTAST LISTE NAVN...",
+    "createList": "OPRET LISTE",
+    "creating": "OPRETTER...",
+    "cancel": "ANNULLER",
+    "success": "Indkøbsliste oprettet!",
+    "error": "Kunne ikke oprette indkøbsliste. Prøv venligst igen.",
+    "validation": {
+      "nameRequired": "Liste navn er påkrævet"
+    }
   }
 }
