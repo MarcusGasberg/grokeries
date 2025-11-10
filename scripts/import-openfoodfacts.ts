@@ -13,7 +13,7 @@
 
 import { nanoid } from "nanoid";
 import { globalGroceryItems, type GroceryCategory } from "@/schema";
-import db from "@/drizzle/drizzle";
+import { db } from "@/drizzle/drizzle";
 
 const OPENFOODFACTS_API = "https://world.openfoodfacts.org/api/v2/search";
 
@@ -97,7 +97,7 @@ function isValidGroceryName(name: string): boolean {
     /barcode/i,
   ];
 
-  if (brandIndicators.some(pattern => pattern.test(lower))) {
+  if (brandIndicators.some((pattern) => pattern.test(lower))) {
     return false;
   }
 
@@ -106,7 +106,7 @@ function isValidGroceryName(name: string): boolean {
   if (digitCount > lower.length * 0.3) return false;
 
   // Reject if looks like a brand/product code
-  if (/^[A-Z0-9\-]{8,}$/i.test(lower.replace(/\s/g, ''))) return false;
+  if (/^[A-Z0-9\-]{8,}$/i.test(lower.replace(/\s/g, ""))) return false;
 
   return true;
 }
@@ -133,7 +133,9 @@ async function fetchCategoryProducts(
   const categoryTags = CATEGORY_MAPPING[category];
   const allProducts: OpenFoodFactsProduct[] = [];
 
-  console.log(`\n📦 Fetching ${category} items (${categoryTags.join(", ")})...`);
+  console.log(
+    `\n📦 Fetching ${category} items (${categoryTags.join(", ")})...`,
+  );
 
   // OpenFoodFacts limits to 100 per page, so we may need multiple requests
   const pages = Math.ceil(limit / 100);
@@ -145,7 +147,10 @@ async function fetchCategoryProducts(
       try {
         const url = new URL(OPENFOODFACTS_API);
         url.searchParams.set("categories_tags", tag);
-        url.searchParams.set("fields", "product_name,generic_name,categories_tags,unique_scans_n");
+        url.searchParams.set(
+          "fields",
+          "product_name,generic_name,categories_tags,unique_scans_n",
+        );
         url.searchParams.set("page_size", pageSize.toString());
         url.searchParams.set("page", page.toString());
         url.searchParams.set("sort_by", "unique_scans_n");
@@ -307,7 +312,9 @@ async function importFromOpenFoodFacts() {
   console.log(`   Total fetched: ${totalFetched}`);
   console.log(`   Total imported: ${totalImported}`);
   console.log(`   Language: ${TARGET_LANGUAGE}`);
-  console.log(`\n📊 Database now contains ${totalImported} ${TARGET_LANGUAGE} items from OpenFoodFacts`);
+  console.log(
+    `\n📊 Database now contains ${totalImported} ${TARGET_LANGUAGE} items from OpenFoodFacts`,
+  );
 }
 
 // Run the import

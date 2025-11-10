@@ -5,21 +5,6 @@
 
 declare module "sst" {
   export interface Resource {
-    "MyVPC": {
-      "type": "sst.aws.Vpc"
-    }
-    "ResendApiKey": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "Web": {
-      "type": "sst.aws.TanstackStart"
-      "url": string
-    }
-    "replication-bucket": {
-      "name": string
-      "type": "sst.aws.Bucket"
-    }
   }
 }
 /// <reference path="sst-env.d.ts" />

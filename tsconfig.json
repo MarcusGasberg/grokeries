@@ -3,7 +3,8 @@
     "**/*.ts",
     "**/*.tsx",
     "public/script*.js",
-    "src/@types/**/*.d.ts"
+    "src/@types/**/*.d.ts",
+    "sst-env.d.ts"
   ],
   "compilerOptions": {
     "strict": true,

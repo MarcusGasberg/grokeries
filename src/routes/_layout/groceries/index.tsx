@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import { useEffect, useRef, useState } from "react";
 import { groceryFormSchema, GroceryFormValue } from "@/shared/grocery.form";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { GroceryCategory } from "@/schema";
-import { authClient } from "@/lib/auth-client";
 import { UserMenu } from "@/components/user-menu";
 import { InviteDialog } from "@/components/invite-dialog";
 import { CreateListDialog } from "@/components/create-list-dialog";
@@ -43,6 +42,10 @@ export const Route = createFileRoute("/_layout/groceries/")({
   validateSearch: (search: Record<string, unknown>) => {
     return groceriesSearchSchema.parse(search);
   },
+  context: () => ({
+    zero: undefined as any,
+    session: undefined as any,
+  }),
 });
 
 interface Category {
@@ -106,9 +109,7 @@ function RouteComponent() {
   const user = session?.data;
   const { listId: listIdFromUrl } = Route.useSearch();
 
-  const listsQuery = zero.query.groceryList
-    .whereExists("members", (q) => q.where("userId", "=", user?.userID ?? "-"))
-    .orderBy("name", "desc");
+  const listsQuery = zero.query.groceryList.orderBy("name", "desc");
 
   const [lists] = useQuery(listsQuery);
 
@@ -273,13 +274,6 @@ function RouteComponent() {
     const language = getNormalizedLanguage(i18n.language);
     const nameNormalized = data.name.toLowerCase().trim();
 
-    console.log("=== Adding item to history ===");
-    console.log("Item name:", data.name);
-    console.log("Normalized:", nameNormalized);
-    console.log("Category:", data.category);
-    console.log("Language:", language);
-    console.log("UserID:", user?.userID);
-
     const historyQuery = zero.query.userGroceryHistory
       .where("userId", "=", user?.userID ?? "")
       .where("nameNormalized", "=", nameNormalized)
@@ -288,26 +282,13 @@ function RouteComponent() {
     const [existingHistory] = await historyQuery.run();
 
     if (existingHistory) {
-      console.log("Updating history:", {
-        id: existingHistory.id,
-        oldUsageCount: existingHistory.usageCount,
-        newUsageCount: (existingHistory.usageCount ?? 0) + 1,
-        oldCategory: existingHistory.category,
-        newCategory: data.category,
-      });
-
       await zero.mutate.userGroceryHistory.update({
         id: existingHistory.id,
         usageCount: (existingHistory.usageCount ?? 0) + 1,
         lastUsedAt: Date.now(),
         category: data.category, // Update category in case it changed
       });
-
-      console.log("Update mutation executed");
     } else {
-      // Create new history entry with current language (with fallback to 'en')
-      console.log("Creating new history entry");
-
       await zero.mutate.userGroceryHistory.insert({
         id: nanoid(),
         userId: user?.userID ?? "",
@@ -320,8 +301,6 @@ function RouteComponent() {
         createdAt: Date.now(),
         globalItemId: null, // We could match this to a global item if desired
       });
-
-      console.log("Insert mutation executed");
     }
 
     form.resetField("name");

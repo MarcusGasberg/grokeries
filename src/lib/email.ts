@@ -1,6 +1,11 @@
+import { must } from "@/shared/must";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = must(
+  process.env.RESEND_API_KEY,
+  "RESEND_API_KEY must be set",
+);
+const resend = new Resend(resendApiKey);
 
 export interface InvitationEmailData {
   to: string;
@@ -116,7 +121,7 @@ IF YOU DIDN'T EXPECT THIS, YOU CAN SAFELY IGNORE IT
   `.trim();
 
   return resend.emails.send({
-    from: "Grokeries <invitations@grokeries.app>",
+    from: "Grokeries <invitations@gasberg.me>",
     to: [to],
     subject: `JOIN ${inviterName.toUpperCase()}'S GROCERY DESTRUCTION MISSION`,
     html,
@@ -219,8 +224,10 @@ THIS LINK WILL EXPIRE IN 24 HOURS
 IF YOU DIDN'T REQUEST THIS, YOU CAN SAFELY IGNORE IT
   `.trim();
 
+  console.log("Sending verification email to:", to);
+
   return resend.emails.send({
-    from: "Grokeries <noreply@grokeries.app>",
+    from: "Grokeries <noreply@gasberg.me>",
     to: [to],
     subject: title,
     html,

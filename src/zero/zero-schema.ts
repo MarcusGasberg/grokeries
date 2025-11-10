@@ -16,7 +16,7 @@ export type UserGroceryHistory = Row<typeof schema.tables.userGroceryHistory>;
 // Auth data shape passed from getUserID
 type AuthData = {
   sub: string; // User ID
-  name: string;
+  name?: string;
 };
 
 export const permissions = definePermissions<AuthData, Schema>(schema, () => ({

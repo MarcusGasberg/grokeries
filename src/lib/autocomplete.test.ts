@@ -16,8 +16,8 @@ describe("rankSuggestions", () => {
       category: "dairy",
       popularity: 1000,
       aliases: ["whole milk", "2% milk", "skim milk"],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     },
     {
       id: "2",
@@ -27,8 +27,8 @@ describe("rankSuggestions", () => {
       category: "bakery",
       popularity: 950,
       aliases: ["white bread", "wheat bread"],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     },
     {
       id: "3",
@@ -38,8 +38,8 @@ describe("rankSuggestions", () => {
       category: "dairy",
       popularity: 500,
       aliases: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     },
   ];
 
@@ -52,9 +52,9 @@ describe("rankSuggestions", () => {
       category: "dairy",
       language: "en",
       usageCount: 10,
-      lastUsedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+      lastUsedAt: Date.now() - 5 * 24 * 60 * 60 * 1000, // 5 days ago
       globalItemId: "1",
-      createdAt: new Date(),
+      createdAt: Date.now(),
     },
   ];
 
@@ -99,8 +99,8 @@ describe("rankSuggestions", () => {
       category: "dairy",
       popularity: 100 - i,
       aliases: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     }));
 
     const result = rankSuggestions("mi", manyItems, [], []);
@@ -123,9 +123,9 @@ describe("rankSuggestions", () => {
         category: "dairy",
         language: "en",
         usageCount: 2,
-        lastUsedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago (recent)
+        lastUsedAt: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago (recent)
         globalItemId: "3",
-        createdAt: new Date(),
+        createdAt: Date.now(),
       },
     ];
 
@@ -179,8 +179,8 @@ describe("findGlobalItem", () => {
       category: "dairy",
       popularity: 1000,
       aliases: ["whole milk", "2% milk"],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     },
     {
       id: "2",
@@ -190,8 +190,8 @@ describe("findGlobalItem", () => {
       category: "bakery",
       popularity: 950,
       aliases: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     },
   ];
 

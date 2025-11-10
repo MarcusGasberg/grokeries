@@ -1,29 +1,33 @@
 import { auth, setCookies } from "@/lib/auth";
-import { createServerFileRoute } from "@tanstack/react-start/server";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const ServerRoute = createServerFileRoute("/api/auth/refresh").methods({
-  GET: async ({ request }) => {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-    if (!session) {
-      console.info("Could not get session");
-      return unauthorized();
-    }
+export const Route = createFileRoute("/api/auth/refresh")({
+  server: {
+    handlers: {
+      GET: async ({ request }) => {
+        const session = await auth.api.getSession({
+          headers: request.headers,
+        });
+        if (!session) {
+          console.info("Could not get session");
+          return unauthorized();
+        }
 
-    const token = await getJwtToken(request.headers);
-    if (!token) {
-      console.info("Could not get JWT token");
-      return unauthorized();
-    }
+        const token = await getJwtToken(request.headers);
+        if (!token) {
+          console.info("Could not get JWT token");
+          return unauthorized();
+        }
 
-    console.info("Refreshed JWT token");
-    return authorized(
-      session.user.id,
-      session.user.name,
-      session.user.email,
-      token,
-    );
+        console.info("Refreshed JWT token");
+        return authorized(
+          session.user.id,
+          session.user.name,
+          session.user.email,
+          token,
+        );
+      },
+    },
   },
 });
 

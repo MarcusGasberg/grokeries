@@ -6,3 +6,10 @@ node_modules
 .nitro
 .output
 sync-replica*
+
+tsconfig.tsbuildinfo
+dist
+
+# zero
+zero-schema.json
+.permissions.sql

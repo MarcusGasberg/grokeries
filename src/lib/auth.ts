@@ -1,4 +1,4 @@
-import db from "@/drizzle/drizzle";
+import { db } from "@/drizzle/drizzle";
 import { betterAuth } from "better-auth";
 
 import { createAuthMiddleware, jwt } from "better-auth/plugins";
@@ -7,42 +7,42 @@ import { must } from "@/shared/must";
 import cookie from "cookie";
 import { sendVerificationEmail } from "./email";
 
+const betterAuthSecret = must(
+  process.env.BETTER_AUTH_SECRET,
+  "BETTER_AUTH_SECRET must be set",
+);
+
+const resendApiKey = must(
+  process.env.RESEND_API_KEY,
+  "RESEND_API_KEY must be set",
+);
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  secret: betterAuthSecret,
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: process.env.NODE_ENV === "production", // Only require in production
     sendResetPassword: async ({ user, url }) => {
       // Send password reset email
-      if (process.env.RESEND_API_KEY) {
-        await sendVerificationEmail({
-          to: user.email,
-          type: "reset-password",
-          verificationUrl: url,
-          userName: user.name,
-        });
-      } else {
-        // In dev mode without Resend, log the URL
-        console.log(`\n🔐 PASSWORD RESET LINK:\n${url}\n`);
-      }
+      await sendVerificationEmail({
+        to: user.email,
+        type: "reset-password",
+        verificationUrl: url,
+        userName: user.name,
+      });
     },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      // Send verification email when user signs up
-      if (process.env.RESEND_API_KEY) {
-        await sendVerificationEmail({
-          to: user.email,
-          type: "verify-email",
-          verificationUrl: url,
-          userName: user.name,
-        });
-      } else {
-        // In dev mode without Resend, log the URL
-        console.log(`\n✉️  EMAIL VERIFICATION LINK FOR ${user.email}:\n${url}\n`);
-      }
+      await sendVerificationEmail({
+        to: user.email,
+        type: "verify-email",
+        verificationUrl: url,
+        userName: user.name,
+      });
     },
     sendOnSignUp: true, // Automatically send verification email on sign up
     autoSignInAfterVerification: true, // Auto sign in after verifying email

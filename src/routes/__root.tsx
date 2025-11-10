@@ -1,9 +1,7 @@
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import {
-  createRootRoute,
   createRootRouteWithContext,
   HeadContent,
-  Link,
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
@@ -41,16 +39,13 @@ function RootComponent() {
   );
 }
 
-const serverURL = must(
-  import.meta.env.VITE_PUBLIC_SERVER,
-  "VITE_PUBLIC_SERVER is required",
-);
-
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const serverURL = import.meta.env.VITE_PUBLIC_SERVER;
+  
   return (
     <html>
       <head>
-        <link rel="preconnect" href={serverURL} />
+        {serverURL && <link rel="preconnect" href={serverURL} />}
         <HeadContent />
       </head>
       <body>

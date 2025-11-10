@@ -41,7 +41,9 @@ export function CreateListDialog({
 
   // Create schema with i18n messages
   const createListSchema = z.object({
-    name: z.string().min(1, { message: t("createListDialog.validation.nameRequired") }),
+    name: z
+      .string()
+      .min(1, { message: t("createListDialog.validation.nameRequired") }),
   });
 
   const {
@@ -128,7 +130,9 @@ export function CreateListDialog({
               className="flex-1 bg-accent text-accent-foreground border-4 border-accent-foreground hover:bg-accent-foreground hover:text-accent font-black font-sans uppercase text-sm shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] hover:shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-4 h-4 mr-2" />
-              {isSubmitting ? t("createListDialog.creating") : t("createListDialog.createList")}
+              {isSubmitting
+                ? t("createListDialog.creating")
+                : t("createListDialog.createList")}
             </Button>
             <Button
               type="button"

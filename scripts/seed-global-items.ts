@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { nanoid } from "nanoid";
 import { globalGroceryItems } from "@/schema";
-import db from "@/drizzle/drizzle";
+import { db } from "@/drizzle/drizzle";
 
 interface CsvRow {
   name: string;
@@ -46,7 +46,11 @@ function parseCsv(content: string): CsvRow[] {
 async function seedLanguage(language: string) {
   console.log(`\n📦 Seeding ${language.toUpperCase()} items...`);
 
-  const csvPath = join(process.cwd(), "seed-data", `global-items-${language}.csv`);
+  const csvPath = join(
+    process.cwd(),
+    "seed-data",
+    `global-items-${language}.csv`,
+  );
 
   try {
     const csvContent = readFileSync(csvPath, "utf-8");
@@ -94,7 +98,7 @@ async function seedLanguage(language: string) {
 
     return { imported, skipped };
   } catch (error: any) {
-    if (error.code === 'ENOENT') {
+    if (error.code === "ENOENT") {
       console.log(`   ⚠️  No CSV file found for ${language} (${csvPath})`);
       return { imported: 0, skipped: 0 };
     }
@@ -106,7 +110,7 @@ async function seedGlobalItems() {
   console.log("🌍 Starting global grocery items seed...\n");
 
   // Supported languages matching SUPPORTED_LANGUAGES from language-utils.ts
-  const languages = ['en', 'da', 'es', 'fr', 'de', 'pt'];
+  const languages = ["en", "da", "es", "fr", "de", "pt"];
 
   let totalImported = 0;
   let totalSkipped = 0;
@@ -120,7 +124,7 @@ async function seedGlobalItems() {
   console.log(`\n🎉 All imports complete!`);
   console.log(`   Total imported: ${totalImported}`);
   console.log(`   Total skipped: ${totalSkipped}`);
-  console.log(`   Languages processed: ${languages.join(', ')}`);
+  console.log(`   Languages processed: ${languages.join(", ")}`);
 }
 
 seedGlobalItems()

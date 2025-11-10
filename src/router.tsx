@@ -10,7 +10,7 @@ export interface RouterContext {
   session: SessionContextType;
 }
 
-export function createRouter() {
+export function getRouter() {
   const router = createTanStackRouter({
     routeTree,
     defaultPreload: "viewport",
@@ -36,6 +36,6 @@ export function createRouter() {
 
 declare module "@tanstack/react-router" {
   interface Register {
-    router: ReturnType<typeof createRouter>;
+    router: ReturnType<typeof getRouter>;
   }
 }

@@ -13,11 +13,7 @@ import {
   Rocket,
 } from "lucide-react";
 
-export const Route = createFileRoute("/")({
-  component: LandingPage,
-});
-
-export function LandingPage() {
+function LandingPage() {
   const features = [
     {
       icon: <Users className="w-8 h-8" />,
@@ -82,16 +78,6 @@ export function LandingPage() {
                 <Rocket className="w-6 h-6 mr-3" />
                 START DESTROYING
                 <ArrowRight className="w-6 h-6 ml-3" />
-              </Button>
-            </Link>
-
-            <Link to="/groceries">
-              <Button
-                variant="outline"
-                size="lg"
-                className="font-black font-sans uppercase tracking-wide text-lg px-8 py-6 border-4 border-primary hover:bg-primary hover:text-primary-foreground shadow-[4px_4px_0px_0px_rgba(249,115,22,1)] hover:shadow-[2px_2px_0px_0px_rgba(249,115,22,1)] transition-all bg-transparent"
-              >
-                TRY DEMO
               </Button>
             </Link>
           </div>
@@ -234,3 +220,7 @@ export function LandingPage() {
     </div>
   );
 }
+
+export const Route = createFileRoute("/")({
+  component: LandingPage,
+});

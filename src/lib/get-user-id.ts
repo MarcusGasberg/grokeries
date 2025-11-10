@@ -19,7 +19,7 @@ export async function getUserID(request: Request) {
 
   const token = authHeader.slice(prefix.length);
   const set = await auth.api.getJwks();
-  const jwks = jose.createLocalJWKSet(set);
+  const jwks = jose.createLocalJWKSet(set as any);
 
   try {
     const { payload } = await jose.jwtVerify(token, jwks);

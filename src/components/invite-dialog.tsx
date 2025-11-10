@@ -42,7 +42,9 @@ export function InviteDialog({
 
   // Create schema with i18n messages
   const inviteSchema = z.object({
-    email: z.string().email({ message: t("inviteDialog.validation.invalidEmail") }),
+    email: z
+      .string()
+      .email({ message: t("inviteDialog.validation.invalidEmail") }),
     message: z.string().optional(),
   });
 
@@ -205,7 +207,9 @@ export function InviteDialog({
               className="flex-1 bg-accent text-accent-foreground border-4 border-accent-foreground hover:bg-accent-foreground hover:text-accent font-black font-sans uppercase text-sm shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] hover:shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4 mr-2" />
-              {isSubmitting ? t("inviteDialog.sending") : t("inviteDialog.sendInvite")}
+              {isSubmitting
+                ? t("inviteDialog.sending")
+                : t("inviteDialog.sendInvite")}
             </Button>
             <Button
               type="button"

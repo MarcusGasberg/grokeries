@@ -1,5 +1,10 @@
-import { Resource } from "sst";
 import { defineConfig } from "drizzle-kit";
+import { must } from "@/shared/must";
+
+const connectionString = must(
+  process.env.DB_CONNECTION_STRING,
+  "DB_CONNECTION_STRING must be set",
+);
 
 export default defineConfig({
   dialect: "postgresql",
@@ -7,11 +12,7 @@ export default defineConfig({
   schema: "./src/schema.ts",
   out: "./src/drizzle/migrations/",
   dbCredentials: {
-    host: Resource.Postgres.host,
-    port: Resource.Postgres.port,
-    user: Resource.Postgres.username,
-    password: Resource.Postgres.password,
-    database: Resource.Postgres.database,
+    url: connectionString,
     ssl: false,
   },
 });

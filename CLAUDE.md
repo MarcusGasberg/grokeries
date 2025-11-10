@@ -122,7 +122,7 @@ Routes are in `src/routes/` and auto-generate `routeTree.gen.ts`:
 - S3 bucket for Litestream backups of Zero replica
 
 **Environment Variables:**
-- `DATABASE_URL` / `ZERO_UPSTREAM_DB`: PostgreSQL connection string
+- `DB_CONNECTION_STRING` / `ZERO_UPSTREAM_DB`: PostgreSQL connection string
 - `PUBLIC_SERVER`: View Syncer URL (localhost:4848 in dev, ALB URL in prod)
 - `ZERO_AUTH_SECRET`: JWT verification secret (prod only; dev uses JWKS URL)
 - `RESEND_API_KEY`: For sending invitation emails

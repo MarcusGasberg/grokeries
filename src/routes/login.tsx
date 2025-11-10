@@ -48,10 +48,15 @@ function LoginComponent() {
 
   const [loginError, setLoginError] = useState<string | null>(null);
   const [needsVerification, setNeedsVerification] = useState(false);
+  const [resetPasswordSuccess, setResetPasswordSuccess] = useState(false);
+  const [resetPasswordError, setResetPasswordError] = useState<string | null>(null);
+  const [isSendingResetEmail, setIsSendingResetEmail] = useState(false);
 
   const onSubmit = async (values: LoginFormValue) => {
     setLoginError(null);
     setNeedsVerification(false);
+    setResetPasswordSuccess(false);
+    setResetPasswordError(null);
 
     const { error } = await authClient.signIn.email({
       email: values.email,
@@ -70,6 +75,34 @@ function LoginComponent() {
       } else {
         setLoginError(error?.message ?? null);
       }
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setResetPasswordSuccess(false);
+    setResetPasswordError(null);
+    setLoginError(null);
+    setIsSendingResetEmail(true);
+    
+    const emailValue = (document.getElementById("email") as HTMLInputElement)?.value;
+    
+    if (!emailValue || !emailValue.includes("@")) {
+      setResetPasswordError(t("login.forgotPasswordError"));
+      setIsSendingResetEmail(false);
+      return;
+    }
+
+    const { error } = await authClient.forgetPassword({
+      email: emailValue,
+      redirectTo: "/login",
+    });
+
+    setIsSendingResetEmail(false);
+
+    if (!error) {
+      setResetPasswordSuccess(true);
+    } else {
+      setResetPasswordError(error?.message ?? "An error occurred");
     }
   };
 
@@ -113,6 +146,18 @@ function LoginComponent() {
                   <p>{loginError}</p>
                 </div>
               )}
+              {resetPasswordSuccess && (
+                <div className="border-4 rounded-lg p-3 text-sm font-medium bg-green-100 text-green-700 border-green-300">
+                  <p className="font-bold uppercase mb-1">✅ SUCCESS</p>
+                  <p>{t("login.forgotPasswordSuccess")}</p>
+                </div>
+              )}
+              {resetPasswordError && (
+                <div className="border-4 rounded-lg p-3 text-sm font-medium bg-red-100 text-red-700 border-red-300">
+                  <p className="font-bold uppercase mb-1">❌ {t("login.errorTitle")}</p>
+                  <p>{resetPasswordError}</p>
+                </div>
+              )}
               {/* Email */}
               <div className="space-y-2">
                 <Label
@@ -137,12 +182,22 @@ function LoginComponent() {
 
               {/* Password */}
               <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="text-sm font-bold font-mono uppercase text-black"
-                >
-                  {t("login.passwordLabel")}
-                </Label>
+                <div className="flex justify-between items-center">
+                  <Label
+                    htmlFor="password"
+                    className="text-sm font-bold font-mono uppercase text-black"
+                  >
+                    {t("login.passwordLabel")}
+                  </Label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={isSendingResetEmail || resetPasswordSuccess}
+                    className="text-xs font-mono uppercase text-orange-500 hover:text-orange-600 underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+                  >
+                    {isSendingResetEmail ? t("login.forgotPasswordSending") : t("login.forgotPassword")}
+                  </button>
+                </div>
                 <Input
                   id="password"
                   type="password"

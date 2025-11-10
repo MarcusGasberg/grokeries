@@ -6,16 +6,16 @@ import { must } from "@/shared/must";
 import { createMutators, Mutators } from "@/zero/mutators";
 import { Schema, schema } from "@/zero/zero-schema";
 
-const serverURL = must(
-  import.meta.env.VITE_PUBLIC_SERVER,
-  "VITE_PUBLIC_SERVER is required",
-);
-
 export function ZeroInit({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { session } = router.options.context;
 
   const opts = useMemo(() => {
+    const serverURL = must(
+      import.meta.env.VITE_PUBLIC_SERVER,
+      "VITE_PUBLIC_SERVER is required",
+    );
+    
     return {
       schema,
       userID: session.data?.userID ?? "anon",
@@ -44,7 +44,7 @@ export function ZeroInit({ children }: { children: React.ReactNode }) {
   return <ZeroProvider {...opts}>{children}</ZeroProvider>;
 }
 
-function preload(z: Zero<Schema>) {
+function preload(z: Zero<Schema, Mutators>) {
   // Delay preload() slightly to avoid blocking UI on first run.
   setTimeout(() => {
     // Preload global grocery items for autocomplete
@@ -59,10 +59,8 @@ function preload(z: Zero<Schema>) {
 
     // Preload user's grocery history for personalized suggestions
     // This allows us to boost items the user frequently adds
-    z.query.userGroceryHistory
-      .orderBy("lastUsedAt", "desc")
-      .preload({
-        ttl: "10m",
-      });
+    z.query.userGroceryHistory.orderBy("lastUsedAt", "desc").preload({
+      ttl: "10m",
+    });
   }, 1_000);
 }

@@ -1,10 +1,9 @@
 import { auth } from "@/lib/auth";
-import { createServerFileRoute } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-import db from "@/drizzle/drizzle";
+import { db } from "@/drizzle/drizzle";
 import {
   groceryList,
   groceryListMembers,
@@ -12,6 +11,8 @@ import {
   user,
 } from "@/schema";
 import { sendInvitationEmail } from "@/lib/email";
+import { createFileRoute } from "@tanstack/react-router";
+import { createServerOnlyFn } from "@tanstack/react-start";
 
 const sendInvitationSchema = z.object({
   listId: z.string(),
@@ -20,114 +21,126 @@ const sendInvitationSchema = z.object({
   message: z.string().optional(),
 });
 
-export const ServerRoute = createServerFileRoute("/api/invitations/$").methods({
-  GET: async ({ request }) => {
-    try {
-      const url = new URL(request.url);
-      const token = url.searchParams.get("token");
+createServerOnlyFn;
 
-      if (!token) {
-        return new Response(
-          JSON.stringify({ error: "Token parameter required" }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          },
-        );
-      }
+export const Route = createFileRoute("/api/invitations/$")({
+  server: {
+    handlers: {
+      GET: async ({ request }) => {
+        try {
+          const url = new URL(request.url);
+          const token = url.searchParams.get("token");
 
-      // Find the invitation
-      const invitation = await db
-        .select({
-          id: groceryListInvitations.id,
-          listId: groceryListInvitations.listId,
-          inviterId: groceryListInvitations.inviterId,
-          inviteeEmail: groceryListInvitations.inviteeEmail,
-          role: groceryListInvitations.role,
-          invitedAt: groceryListInvitations.invitedAt,
-          expiresAt: groceryListInvitations.expiresAt,
-          status: groceryListInvitations.status,
-          listName: groceryList.name,
-          inviterName: user.name,
-        })
-        .from(groceryListInvitations)
-        .innerJoin(
-          groceryList,
-          eq(groceryListInvitations.listId, groceryList.id),
-        )
-        .innerJoin(user, eq(groceryListInvitations.inviterId, user.id))
-        .where(eq(groceryListInvitations.token, token))
-        .limit(1);
+          if (!token) {
+            return new Response(
+              JSON.stringify({ error: "Token parameter required" }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
 
-      if (!invitation.length) {
-        return new Response(JSON.stringify({ error: "Invitation not found" }), {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
+          // Find the invitation
+          const invitation = await db
+            .select({
+              id: groceryListInvitations.id,
+              listId: groceryListInvitations.listId,
+              inviterId: groceryListInvitations.inviterId,
+              inviteeEmail: groceryListInvitations.inviteeEmail,
+              role: groceryListInvitations.role,
+              invitedAt: groceryListInvitations.invitedAt,
+              expiresAt: groceryListInvitations.expiresAt,
+              status: groceryListInvitations.status,
+              listName: groceryList.name,
+              inviterName: user.name,
+            })
+            .from(groceryListInvitations)
+            .innerJoin(
+              groceryList,
+              eq(groceryListInvitations.listId, groceryList.id),
+            )
+            .innerJoin(user, eq(groceryListInvitations.inviterId, user.id))
+            .where(eq(groceryListInvitations.token, token))
+            .limit(1);
 
-      const inv = invitation[0];
+          if (!invitation.length) {
+            return new Response(
+              JSON.stringify({ error: "Invitation not found" }),
+              {
+                status: 404,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
 
-      // Check if invitation is expired
-      if (new Date() > new Date(inv.expiresAt) || inv.status !== "pending") {
-        return new Response(
-          JSON.stringify({ error: "Invitation is no longer valid" }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          },
-        );
-      }
+          const inv = invitation[0];
 
-      return new Response(
-        JSON.stringify({
-          id: inv.id,
-          listId: inv.listId,
-          listName: inv.listName,
-          inviterName: inv.inviterName,
-          inviteeEmail: inv.inviteeEmail,
-          role: inv.role,
-          invitedAt: inv.invitedAt,
-          expiresAt: inv.expiresAt,
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    } catch (error) {
-      console.error("Error getting invitation:", error);
-      return new Response(
-        JSON.stringify({ error: "Failed to get invitation" }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
-  },
+          // Check if invitation is expired
+          if (
+            new Date() > new Date(inv.expiresAt) ||
+            inv.status !== "pending"
+          ) {
+            return new Response(
+              JSON.stringify({ error: "Invitation is no longer valid" }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
 
-  POST: async ({ request }) => {
-    try {
-      const url = new URL(request.url);
-      const action = url.searchParams.get("action");
+          return new Response(
+            JSON.stringify({
+              id: inv.id,
+              listId: inv.listId,
+              listName: inv.listName,
+              inviterName: inv.inviterName,
+              inviteeEmail: inv.inviteeEmail,
+              role: inv.role,
+              invitedAt: inv.invitedAt,
+              expiresAt: inv.expiresAt,
+            }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        } catch (error) {
+          console.error("Error getting invitation:", error);
+          return new Response(
+            JSON.stringify({ error: "Failed to get invitation" }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+      },
 
-      if (action === "accept" || action === "decline") {
-        return handleAcceptDecline(request, action);
-      }
+      POST: async ({ request }) => {
+        try {
+          const url = new URL(request.url);
+          const action = url.searchParams.get("action");
 
-      // Default to send invitation
-      return handleSendInvitation(request);
-    } catch (error) {
-      console.error("Error processing invitation request:", error);
-      return new Response(
-        JSON.stringify({ error: "Failed to process request" }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
+          if (action === "accept" || action === "decline") {
+            return handleAcceptDecline(request, action);
+          }
+
+          // Default to send invitation
+          return handleSendInvitation(request);
+        } catch (error) {
+          console.error("Error processing invitation request:", error);
+          return new Response(
+            JSON.stringify({ error: "Failed to process request" }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+      },
+    },
   },
 });
 
@@ -453,4 +466,3 @@ async function handleAcceptDecline(
     );
   }
 }
-

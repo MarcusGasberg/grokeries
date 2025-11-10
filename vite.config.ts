@@ -1,4 +1,7 @@
+import viteReact from "@vitejs/plugin-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { nitro } from "nitro/vite";
+
 import tsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
@@ -12,15 +15,21 @@ export default defineConfig({
       projects: ["./tsconfig.json"],
     }),
     tailwindcss(),
+    nitro({
+      config: {
+        preset: "aws-lambda",
+        compatibilityDate: "2025-10-18",
+      },
+    }),
     tanstackStart({
-      target: "aws_lambda",
-      customViteReactPlugin: true,
       spa: {
         enabled: true,
       },
-      tsr: {
-        srcDirectory: "src",
+      prerender: {
+        enabled: false,
       },
+      srcDirectory: "src",
     }),
+    viteReact(),
   ],
 });
