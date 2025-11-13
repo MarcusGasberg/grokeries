@@ -45,6 +45,9 @@ function LoginComponent() {
     mode: "onBlur",
   });
   const router = useRouter();
+  const search = router.state.location.search;
+  const urlParams = new URLSearchParams(search);
+  const callbackUrl = urlParams.get('callbackUrl') || '/groceries';
 
   const [loginError, setLoginError] = useState<string | null>(null);
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -61,11 +64,11 @@ function LoginComponent() {
     const { error } = await authClient.signIn.email({
       email: values.email,
       password: values.password,
-      callbackURL: "/groceries",
+      callbackURL: callbackUrl,
     });
 
     if (!error) {
-      router.navigate({ to: "/groceries" });
+      router.navigate({ to: callbackUrl });
     } else {
       // Check if error is related to email verification
       if (error?.message?.toLowerCase().includes("verify") ||

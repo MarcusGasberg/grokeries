@@ -63,5 +63,40 @@
     "validation": {
       "nameRequired": "List name is required"
     }
-  }
+   },
+   "invitations": {
+     "accept": {
+       "title": "INVITATION ACCEPTED",
+       "subtitle": "WELCOME TO THE TEAM",
+       "message": "You've successfully joined the grocery list!",
+       "redirecting": "REDIRECTING TO LIST...",
+       "countdown": "Redirecting in {{count}} seconds...",
+       "processing": "PROCESSING...",
+       "accepting": "ACCEPTING INVITATION...",
+       "errorTitle": "❌ ERROR",
+       "backToHome": "BACK TO HOME",
+       "unexpectedError": "An unexpected error occurred",
+       "failedToAccept": "Failed to accept invitation",
+       "successMessage": "Successfully joined the grocery list!",
+       "alreadyMember": "Already a member of this list",
+       "invitationNotFound": "Invitation not found or already processed",
+       "invitationExpired": "Invitation has expired",
+       "mustBeLoggedIn": "You must be logged in to accept invitations",
+       "wrongEmail": "This invitation is not for your email address"
+     },
+     "decline": {
+       "title": "INVITATION DECLINED",
+       "subtitle": "NO PROBLEM",
+       "message": "The invitation has been declined.",
+       "backToHome": "BACK TO HOME",
+       "processing": "PROCESSING...",
+       "declining": "DECLINING INVITATION...",
+       "errorTitle": "❌ ERROR",
+       "unexpectedError": "An unexpected error occurred",
+       "failedToDecline": "Failed to decline invitation",
+       "successMessage": "Invitation declined",
+       "invitationNotFound": "Invitation not found or already processed",
+       "invitationExpired": "Invitation has expired"
+     }
+   }
 }

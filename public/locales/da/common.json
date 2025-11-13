@@ -63,5 +63,40 @@
     "validation": {
       "nameRequired": "Liste navn er påkrævet"
     }
-  }
+   },
+   "invitations": {
+     "accept": {
+       "title": "INVITATION ACCEPTERET",
+       "subtitle": "VELKOMMEN TIL HOLDET",
+       "message": "Du er nu medlem af indkøbslisten!",
+       "redirecting": "OMDIRIGERER TIL LISTEN...",
+       "countdown": "Omdirigerer om {{count}} sekunder...",
+       "processing": "BEHANDLER...",
+       "accepting": "ACCEPTERER INVITATION...",
+       "errorTitle": "❌ FEJL",
+       "backToHome": "TILBAGE TIL HJEM",
+       "unexpectedError": "En uventet fejl opstod",
+       "failedToAccept": "Kunne ikke acceptere invitation",
+       "successMessage": "Du er nu medlem af indkøbslisten!",
+       "alreadyMember": "Allerede medlem af denne liste",
+       "invitationNotFound": "Invitation ikke fundet eller allerede behandlet",
+       "invitationExpired": "Invitationen er udløbet",
+       "mustBeLoggedIn": "Du skal være logget ind for at acceptere invitationer",
+       "wrongEmail": "Denne invitation er ikke til din email adresse"
+     },
+     "decline": {
+       "title": "INVITATION AFSLÅET",
+       "subtitle": "INGEN PROBLEM",
+       "message": "Invitationen er blevet afslået.",
+       "backToHome": "TILBAGE TIL HJEM",
+       "processing": "BEHANDLER...",
+       "declining": "AFSLÅR INVITATION...",
+       "errorTitle": "❌ FEJL",
+       "unexpectedError": "En uventet fejl opstod",
+       "failedToDecline": "Kunne ikke afslå invitation",
+       "successMessage": "Invitation afslået",
+       "invitationNotFound": "Invitation ikke fundet eller allerede behandlet",
+       "invitationExpired": "Invitationen er udløbet"
+     }
+   }
 }

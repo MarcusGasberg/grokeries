@@ -13,6 +13,7 @@ import {
 import { sendInvitationEmail } from "@/lib/email";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerOnlyFn } from "@tanstack/react-start";
+import { acceptInvitation, declineInvitation } from "@/functions/invitations";
 
 const sendInvitationSchema = z.object({
   listId: z.string(),
@@ -281,8 +282,8 @@ async function handleSendInvitation(request: Request) {
 
   // Send email
   const baseUrl = process.env.PUBLIC_SERVER || "http://localhost:3000";
-  const acceptUrl = `${baseUrl}/invitations/accept?token=${token}`;
-  const declineUrl = `${baseUrl}/invitations/decline?token=${token}`;
+  const acceptUrl = `${baseUrl}/api/invitations/accept?token=${token}`;
+  const declineUrl = `${baseUrl}/api/invitations/decline?token=${token}`;
 
   await sendInvitationEmail({
     to: email,
@@ -412,6 +413,11 @@ async function handleAcceptDecline(
       )
       .limit(1);
 
+    const baseUrl = process.env.PUBLIC_SERVER || "http://localhost:3000";
+
+    const redirectUrl = new URL(`${baseUrl}/groceries`);
+    redirectUrl.searchParams.append("listId", inv.listId);
+
     if (existingMember.length) {
       // Mark invitation as accepted (even though they're already a member)
       await db
@@ -419,16 +425,7 @@ async function handleAcceptDecline(
         .set({ status: "accepted" })
         .where(eq(groceryListInvitations.id, inv.id));
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "You are already a member of this list",
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      return Response.redirect(redirectUrl, 301);
     }
 
     // Add user to the list
@@ -445,16 +442,7 @@ async function handleAcceptDecline(
       .set({ status: "accepted" })
       .where(eq(groceryListInvitations.id, inv.id));
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Successfully joined the grocery list!",
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    return Response.redirect(redirectUrl, 301);
   } catch (error) {
     console.error(`Error ${action}ing invitation:`, error);
     return new Response(

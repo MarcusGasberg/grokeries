@@ -5,6 +5,42 @@
 
 declare module "sst" {
   export interface Resource {
+    "BETTER_AUTH_SECRET": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "MyVPC": {
+      "type": "sst.aws.Vpc"
+    }
+    "Postgres": {
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "type": "sst.aws.Postgres"
+      "username": string
+    }
+    "RESEND_API_KEY": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "Web": {
+      "type": "sst.aws.TanstackStart"
+      "url": string
+    }
+    "replication-bucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
+    "view-syncer": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
+    "zero-permissions-deployer": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />

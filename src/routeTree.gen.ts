@@ -9,11 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as InvitationsRouteImport } from './routes/invitations'
 import { Route as LayoutRouteRouteImport } from './routes/_layout/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InvitationsIndexRouteImport } from './routes/invitations/index'
+import { Route as InvitationsDeclineRouteImport } from './routes/invitations/decline'
+import { Route as InvitationsAcceptRouteImport } from './routes/invitations/accept'
 import { Route as LayoutSettingsIndexRouteImport } from './routes/_layout/settings/index'
 import { Route as LayoutGroceriesIndexRouteImport } from './routes/_layout/groceries/index'
 import { Route as ApiZeroMutateRouteImport } from './routes/api/zero/mutate'
@@ -23,6 +26,11 @@ import { Route as ApiAuthRefreshRouteImport } from './routes/api/auth/refresh'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as LayoutGroceriesShoppingIndexRouteImport } from './routes/_layout/groceries/shopping/index'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -33,11 +41,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InvitationsRoute = InvitationsRouteImport.update({
-  id: '/invitations',
-  path: '/invitations',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LayoutRouteRoute = LayoutRouteRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
@@ -45,6 +48,21 @@ const LayoutRouteRoute = LayoutRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationsIndexRoute = InvitationsIndexRouteImport.update({
+  id: '/invitations/',
+  path: '/invitations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationsDeclineRoute = InvitationsDeclineRouteImport.update({
+  id: '/invitations/decline',
+  path: '/invitations/decline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationsAcceptRoute = InvitationsAcceptRouteImport.update({
+  id: '/invitations/accept',
+  path: '/invitations/accept',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutSettingsIndexRoute = LayoutSettingsIndexRouteImport.update({
@@ -91,9 +109,12 @@ const LayoutGroceriesShoppingIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/invitations': typeof InvitationsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/invitations/accept': typeof InvitationsAcceptRoute
+  '/invitations/decline': typeof InvitationsDeclineRoute
+  '/invitations': typeof InvitationsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/invitations/$': typeof ApiInvitationsSplatRoute
@@ -105,9 +126,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/invitations': typeof InvitationsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/invitations/accept': typeof InvitationsAcceptRoute
+  '/invitations/decline': typeof InvitationsDeclineRoute
+  '/invitations': typeof InvitationsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/invitations/$': typeof ApiInvitationsSplatRoute
@@ -121,9 +145,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_layout': typeof LayoutRouteRouteWithChildren
-  '/invitations': typeof InvitationsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/invitations/accept': typeof InvitationsAcceptRoute
+  '/invitations/decline': typeof InvitationsDeclineRoute
+  '/invitations/': typeof InvitationsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/invitations/$': typeof ApiInvitationsSplatRoute
@@ -137,9 +164,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/invitations'
     | '/login'
     | '/register'
+    | '/reset-password'
+    | '/invitations/accept'
+    | '/invitations/decline'
+    | '/invitations'
     | '/api/auth/$'
     | '/api/auth/refresh'
     | '/api/invitations/$'
@@ -151,9 +181,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/invitations'
     | '/login'
     | '/register'
+    | '/reset-password'
+    | '/invitations/accept'
+    | '/invitations/decline'
+    | '/invitations'
     | '/api/auth/$'
     | '/api/auth/refresh'
     | '/api/invitations/$'
@@ -166,9 +199,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_layout'
-    | '/invitations'
     | '/login'
     | '/register'
+    | '/reset-password'
+    | '/invitations/accept'
+    | '/invitations/decline'
+    | '/invitations/'
     | '/api/auth/$'
     | '/api/auth/refresh'
     | '/api/invitations/$'
@@ -182,9 +218,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LayoutRouteRoute: typeof LayoutRouteRouteWithChildren
-  InvitationsRoute: typeof InvitationsRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  InvitationsAcceptRoute: typeof InvitationsAcceptRoute
+  InvitationsDeclineRoute: typeof InvitationsDeclineRoute
+  InvitationsIndexRoute: typeof InvitationsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAuthRefreshRoute: typeof ApiAuthRefreshRoute
   ApiInvitationsSplatRoute: typeof ApiInvitationsSplatRoute
@@ -194,6 +233,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -208,13 +254,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/invitations': {
-      id: '/invitations'
-      path: '/invitations'
-      fullPath: '/invitations'
-      preLoaderRoute: typeof InvitationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_layout': {
       id: '/_layout'
       path: ''
@@ -227,6 +266,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitations/': {
+      id: '/invitations/'
+      path: '/invitations'
+      fullPath: '/invitations'
+      preLoaderRoute: typeof InvitationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitations/decline': {
+      id: '/invitations/decline'
+      path: '/invitations/decline'
+      fullPath: '/invitations/decline'
+      preLoaderRoute: typeof InvitationsDeclineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitations/accept': {
+      id: '/invitations/accept'
+      path: '/invitations/accept'
+      fullPath: '/invitations/accept'
+      preLoaderRoute: typeof InvitationsAcceptRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/settings/': {
@@ -307,9 +367,12 @@ const LayoutRouteRouteWithChildren = LayoutRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LayoutRouteRoute: LayoutRouteRouteWithChildren,
-  InvitationsRoute: InvitationsRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  InvitationsAcceptRoute: InvitationsAcceptRoute,
+  InvitationsDeclineRoute: InvitationsDeclineRoute,
+  InvitationsIndexRoute: InvitationsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAuthRefreshRoute: ApiAuthRefreshRoute,
   ApiInvitationsSplatRoute: ApiInvitationsSplatRoute,
